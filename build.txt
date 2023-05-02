@@ -1,0 +1,3 @@
+displayName = Lord of the Mysteries
+author = Peter Chen
+version = 0.1
