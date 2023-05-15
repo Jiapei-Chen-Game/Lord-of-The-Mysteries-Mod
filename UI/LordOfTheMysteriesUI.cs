@@ -8,11 +8,17 @@ using Terraria.GameContent.UI.Elements;
 
 namespace LordOfTheMysteriesMod.UI
 {
-    public class NoteBookPanel : UIElement
+    public class NoteBookElement : UIElement
     {
+        string texturePath;
+
+        public NoteBookElement(string path) {
+            this.texturePath = path;
+        }
+
         protected override void DrawSelf(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/PanelBackground").Value, GetDimensions().Position(), Color.White);
+            spriteBatch.Draw(ModContent.Request<Texture2D>(texturePath).Value, GetDimensions().Position(), Color.White);
         }
     }
 
@@ -38,22 +44,36 @@ namespace LordOfTheMysteriesMod.UI
 
         public override void OnInitialize() 
         {
-            NoteBookPanel panel = new NoteBookPanel();
-            panel.Width.Set(568f, 0f);
-            panel.Height.Set(488f, 0f);
-            panel.Left.Set(-284f, 0.5f);
-            panel.Top.Set(-244f, 0.5f);
-            Append(panel);
+            NoteBookElement Cover = new NoteBookElement("LordOfTheMysteriesMod/UI/NotebookCover");
+            Cover.Width.Set(568f, 0f);
+            Cover.Height.Set(488f, 0f);
+            Cover.Left.Set(-284f, 0.5f);
+            Cover.Top.Set(-244f, 0.5f);
+            Append(Cover);
+
+            NoteBookElement leftPage = new NoteBookElement("LordOfTheMysteriesMod/UI/NotebookLeftPage");
+            leftPage.Width.Set(258f, 0f);
+            leftPage.Height.Set(438f, 0f);
+            leftPage.Left.Set(-258f, 0.5f);
+            leftPage.Top.Set(25f, 0f);
+            Cover.Append(leftPage);
+
+            NoteBookElement rightPage = new NoteBookElement("LordOfTheMysteriesMod/UI/NotebookRightPage");
+            rightPage.Width.Set(258f, 0f);
+            rightPage.Height.Set(438f, 0f);
+            rightPage.Left.Set(0f, 0.5f);
+            rightPage.Top.Set(25f, 0f);
+            Cover.Append(rightPage);
 
             UIImageButton closeButton = new UIImageButton(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/ButtonDelete"));
             closeButton.Width.Set(32f, 0f);
             closeButton.Height.Set(32f, 0f);
-            closeButton.Left.Set(-48f, 1f);
-            closeButton.Top.Set(16f, 0f);
+            closeButton.Left.Set(-75f, 1f);
+            closeButton.Top.Set(27f, 0f);
             closeButton.OnClick += (evt, element) => {
                 Visible = false;
             };
-            panel.Append(closeButton);
+            Cover.Append(closeButton);
         }
     }
 }
