@@ -1,0 +1,46 @@
+{
+    // single: Comments are single-line comments that start with three slashes (///) (Default)
+    // delimited: Delimited comments that start with a slash and two stars (/**)
+    "docomment.syntax": "single",
+    // Press the Enter key to activate a command (Default: false)
+    "docomment.activateOnEnter": false,
+    // User-controllable options
+    "docomment.advanced": {
+        "cs": {
+            "namespace" : {
+                "attributes" : ["summary"]
+            },
+            "class" : {
+                "attributes" : ["summary", "typeparam", "author", "Last Modify Date"]
+            },
+            "interface" : {
+                "attributes" : ["summary", "typeparam", "author", "Last Modify Date"]
+            },
+            "struct" : {
+                "attributes" : ["summary", "author", "Last Modify Date"]
+            },
+            "enum" : {
+                "attributes" : ["summary"]
+            },
+            "delegate" : {
+                "attributes" : ["summary", "param", "typeparam", "returns"]
+            },
+            "field" : {
+                "attributes" : ["summary"]
+            },
+            "property" : {
+                "attributes" : ["summary", "value"]
+            },
+            "method" : {
+                "attributes" : ["summary", "param", "typeparam", "returns", "author", "Last Modify Date"]
+            },
+            "event" : {
+                "attributes" : ["summary"]
+            }
+        }
+    },
+    // Insert spaces when pressing Tab.
+    "editor.insertSpaces": true,
+    // The number of spaces a tab is equal to.
+    "editor.tabSize": 4
+}
