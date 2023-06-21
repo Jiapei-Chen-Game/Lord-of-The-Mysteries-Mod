@@ -12,7 +12,7 @@ namespace LordOfTheMysteriesMod.Buffs
     public class FolkOfRageBuff : ModBuff
     {
         BeyonderAbilities Abilities = new BeyonderAbilities();
-
+        
         public override void SetStaticDefaults()
         {
             DisplayName.SetDefault("Folk Of Rage Buff");
@@ -33,7 +33,7 @@ namespace LordOfTheMysteriesMod.Buffs
 
             //Being able to stay underwater for more than 10 minutes.
             Abilities.UpdateBeyonderAbilities(player);
-
+            
             //Make sure that this buff will never be removed...at least for now.
             player.buffTime[buffIndex] = 1;
         }
