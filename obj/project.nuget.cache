@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "A/PfztBxVLtoE2CWO3Cjqhgq5EH3iYj0VuqfG+0K+ZEi0MQ3tUTAowLpfAvraFRwHEpKln0KccZGNubbvuC1+Q==",
+  "success": true,
+  "projectFilePath": "c:\\Users\\jiape\\OneDrive\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\LordOfTheMysteriesMod\\LordOfTheMysteriesMod.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\jiape\\.nuget\\packages\\tmodloader.codeassist\\0.1.5\\tmodloader.codeassist.0.1.5.nupkg.sha512",
+    "C:\\Users\\jiape\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.18\\microsoft.netcore.app.ref.6.0.18.nupkg.sha512",
+    "C:\\Users\\jiape\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.18\\microsoft.windowsdesktop.app.ref.6.0.18.nupkg.sha512",
+    "C:\\Users\\jiape\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.18\\microsoft.aspnetcore.app.ref.6.0.18.nupkg.sha512"
+  ],
+  "logs": []
+}

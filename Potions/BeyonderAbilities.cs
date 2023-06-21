@@ -30,6 +30,10 @@ namespace LordOfTheMysteriesMod.Buffs
 
         public static Dictionary<string, Action<Player>> Abilities = new Dictionary<string, Action<Player>>();
 
+        /// <summary>
+        /// This method Iterates through the player's beyonder abilities and runs the corresponding function every updates.
+        /// </summary>
+        /// <param name="player"></param>
         public void UpdateBeyonderAbilities(Player player)
         {
             foreach (KeyValuePair<string, Action<Player>> element in player.GetModPlayer<LordOfTheMysteriesModPlayer>().AbilityList) {
@@ -37,8 +41,11 @@ namespace LordOfTheMysteriesMod.Buffs
             }
         }
 
-        //Tyrant Pathway, Sequence 9, Sailor
-        //Increases breathing time underwater
+        /// <summary>
+        /// Tyrant Pathway, Sequence 9, Sailor
+        /// Increases breathing time underwater
+        /// </summary>
+        /// <param name="player"></param>
         public void EnhancedBreathing(Player player)
         {
             int Sequence = player.GetModPlayer<LordOfTheMysteriesModPlayer>().Sequence;
