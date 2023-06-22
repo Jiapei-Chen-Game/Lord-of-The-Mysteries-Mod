@@ -42,7 +42,7 @@ namespace LordOfTheMysteriesMod.Buffs
         }
 
         /// <summary>
-        /// Tyrant Pathway, Sequence 9, Sailor
+        /// Tyrant Pathway, Sequence 9, Sailor,
         /// Increases breathing time underwater
         /// </summary>
         /// <param name="player"></param>
