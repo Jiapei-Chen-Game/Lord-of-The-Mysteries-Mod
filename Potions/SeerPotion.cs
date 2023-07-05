@@ -14,6 +14,7 @@ namespace LordOfTheMysteriesMod.Potions
 	{
 
 		public int Sequence = 9;
+		public string SequenceName = "Seer";
 		public string Pathway = "Seer";
 		public string[] Abilities = {};
 
@@ -60,8 +61,9 @@ namespace LordOfTheMysteriesMod.Potions
 
         public override bool? UseItem(Player player)
         {
-            BeyonderPotion.PotionEffectRoll(player, Pathway, Sequence, ModContent.BuffType<SeerBuff>(), Abilities);
+            BeyonderPotion.PotionEffectRoll(player, Pathway, SequenceName, Sequence, ModContent.BuffType<SeerBuff>(), Abilities);
 			Main.NewText("Player Sequence: " + player.GetModPlayer<LordOfTheMysteriesModPlayer>().Sequence, 255, 255, 255);
+			Main.NewText("Player Sequence Name: " + player.GetModPlayer<LordOfTheMysteriesModPlayer>().SequenceName, 255, 255, 255);
 			Main.NewText("Player Pathway: " + player.GetModPlayer<LordOfTheMysteriesModPlayer>().Pathway, 255, 255, 255);
 		    return true;
         }

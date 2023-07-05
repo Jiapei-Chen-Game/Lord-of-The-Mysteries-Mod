@@ -1,11 +1,8 @@
-using System;
-
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using LordOfTheMysteriesMod.Buffs;
 
-using Terraria.DataStructures;
 using Terraria.Localization;
 
 namespace LordOfTheMysteriesMod.Potions
@@ -14,7 +11,8 @@ namespace LordOfTheMysteriesMod.Potions
 	{
 
 		public int Sequence = 8;
-		public string Pathway = "Tyrant";
+		public string SequenceName = "Folk of Rage";
+		public string Pathway = "Sailor";
 		public string[] Abilities = {"EnhancedBreathing", "FastSwimming", "NightVision", "RagingBlow"};
 
 		public override void SetStaticDefaults()
@@ -59,8 +57,9 @@ namespace LordOfTheMysteriesMod.Potions
 
         public override bool? UseItem(Player player)
         {
-            BeyonderPotion.PotionEffectRoll(player, Pathway, Sequence, ModContent.BuffType<FolkOfRageBuff>(), Abilities);
+            BeyonderPotion.PotionEffectRoll(player, Pathway, SequenceName, Sequence, ModContent.BuffType<FolkOfRageBuff>(), Abilities);
 			Main.NewText("Player Sequence: " + player.GetModPlayer<LordOfTheMysteriesModPlayer>().Sequence, 255, 255, 255);
+			Main.NewText("Player Sequence Name: " + player.GetModPlayer<LordOfTheMysteriesModPlayer>().SequenceName, 255, 255, 255);
 			Main.NewText("Player Pathway: " + player.GetModPlayer<LordOfTheMysteriesModPlayer>().Pathway, 255, 255, 255);
 		    return true;
         }

@@ -14,7 +14,8 @@ namespace LordOfTheMysteriesMod.Potions
 	{
 
 		public int Sequence = 7;
-		public string Pathway = "Tyrant";
+		public string SequenceName = "Seafarer";
+		public string Pathway = "Sailor";
 		public string[] Abilities = {"EnhancedBreathing", "FastSwimming", "NightVision", "RagingBlow", "SeafarerSense", "WaterBall", "WaterLight"};
 
 		public override void SetStaticDefaults()
@@ -59,8 +60,9 @@ namespace LordOfTheMysteriesMod.Potions
 
         public override bool? UseItem(Player player)
         {
-            BeyonderPotion.PotionEffectRoll(player, Pathway, Sequence, ModContent.BuffType<SeafarerBuff>(), Abilities);
+            BeyonderPotion.PotionEffectRoll(player, Pathway, SequenceName, Sequence, ModContent.BuffType<SeafarerBuff>(), Abilities);
 			Main.NewText("Player Sequence: " + player.GetModPlayer<LordOfTheMysteriesModPlayer>().Sequence, 255, 255, 255);
+			Main.NewText("Player Sequence Name: " + player.GetModPlayer<LordOfTheMysteriesModPlayer>().SequenceName, 255, 255, 255);
 			Main.NewText("Player Pathway: " + player.GetModPlayer<LordOfTheMysteriesModPlayer>().Pathway, 255, 255, 255);
 		    return true;
         }

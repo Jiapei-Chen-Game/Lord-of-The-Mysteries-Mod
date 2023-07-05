@@ -1,12 +1,9 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
 
 using Terraria;
 using Terraria.UI;
-using Terraria.ID;
 using Terraria.ModLoader;
 
 using LordOfTheMysteriesMod.UI;
@@ -15,10 +12,10 @@ namespace LordOfTheMysteriesMod
 {
     public class LordOfTheMysteriesModSystem : ModSystem
     {
-		NoteBookUI NoteBook = new NoteBookUI();
-		UserInterface NoteBookInterface = new UserInterface();
-		NoteBookButton NoteBookButton = new NoteBookButton();
-		UserInterface NoteBookButtonInterface = new UserInterface();
+		NoteBookUI NoteBook = new();
+		UserInterface NoteBookInterface = new();
+		NoteBookButton NoteBookButton = new();
+		UserInterface NoteBookButtonInterface = new();
 
         public override void Load()
         {

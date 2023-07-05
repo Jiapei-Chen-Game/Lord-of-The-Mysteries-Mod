@@ -16,13 +16,19 @@ The notebook should be able to display the following information:
 
 Section 1:
 
-- [ ] The player's current path
-- [ ] The player's current sequence
-- [ ] The player's current sequence name
+- [x] The player's current path
+- [x] The player's current sequence
+- [x] The player's current sequence name
 
   The above information should be syncronized with the player's path and sequence so that the player can check the changes as soon as something is changed.
 
   The path name will change as soon as the player hears the name of sequence 0 from some NPC. For example: Sailor --> Tyrant
+
+- [x] A picture of the symbol of the pathway the player belongs to
+
+  // TODO: The picture is still blurry. Problem needs to be fixed.
+  
+- [ ] Add a frame to the picture
 
 Section 2:
 

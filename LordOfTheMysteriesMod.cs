@@ -1,15 +1,6 @@
 using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework.Graphics;
-
-using Microsoft.Xna.Framework;
-
 using Terraria;
-using Terraria.UI;
-using Terraria.ID;
 using Terraria.ModLoader;
-using Terraria.Localization;
-
 using LordOfTheMysteriesMod.Buffs;
 
 namespace LordOfTheMysteriesMod
@@ -18,7 +9,7 @@ namespace LordOfTheMysteriesMod
 	{
 		public override void Load()
 		{
-			BeyonderAbilities BeyonderAbilities = new BeyonderAbilities();
+			BeyonderAbilities BeyonderAbilities = new();
 			BeyonderAbilities.Abilities.Add("EnhancedBreathing", new Action<Player>(BeyonderAbilities.EnhancedBreathing));
 			BeyonderAbilities.Abilities.Add("FastSwimming", new Action<Player>(BeyonderAbilities.FastSwimming));
 			BeyonderAbilities.Abilities.Add("NightVision", new Action<Player>(BeyonderAbilities.NightVision));
