@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
@@ -7,7 +6,6 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using LordOfTheMysteriesMod;
 using LordOfTheMysteriesMod.Projectiles;
 
 namespace LordOfTheMysteriesMod.Buffs
@@ -63,8 +61,11 @@ namespace LordOfTheMysteriesMod.Buffs
             }
         }
 
-        //Tyrant Pathway, Sequence 9, Sailor
-        //Let the player swim swiftly under water
+        /// <summary>
+        /// Tyrant Pathway, Sequence 9, Sailor, 
+        /// Let the player swim swiftly under water
+        /// </summary>
+        /// <param name="player"></param>
         public void FastSwimming(Player player)
         {
             player.ignoreWater = true;
@@ -73,16 +74,22 @@ namespace LordOfTheMysteriesMod.Buffs
             }
         }
 
-        //Tyrant Pathway, Sequence 9, Sailor
-        //The player can see further at night when there is light
+        /// <summary>
+        /// Tyrant Pathway, Sequence 9, Sailor, 
+        /// The player can see further at night when there is light
+        /// </summary>
+        /// <param name="player"></param>
         public void NightVision(Player player)
         {
             player.nightVision = true;
         }
 
-        //Tyrant Pathway, Sequence 8, Folk of Rage
-        //Increases melee damage and crit chance for 10 seconds 
-        //CD is 60 seconds
+        /// <summary>
+        /// Tyrant Pathway, Sequence 8, Folk of Rage, 
+        /// Increases melee damage and crit chance for 10 seconds 
+        /// CD: 60 seconds
+        /// </summary>
+        /// <param name="player"></param>
         public void RagingBlow(Player player)
         {
             if (player.GetModPlayer<LordOfTheMysteriesModPlayer>().RagingBlowHit && !RagingBlowInCD && !InRagingBlow) {
@@ -115,23 +122,29 @@ namespace LordOfTheMysteriesMod.Buffs
             }
         }
 
-        //Tyrant Pathway, Sequence 7, Seafarer
-        //Being able to discern weather and direction
+        /// <summary>
+        /// Tyrant Pathway, Sequence 7, Seafarer, 
+        /// Being able to discern weather and direction
+        /// </summary>
+        /// <param name="player"></param>
         public void SeafarerSense(Player player)
         {
             player.accCompass = 1;
             player.accWeatherRadio = true;
         }
 
-        //Tyrant Pathway, Sequence 7, Seafarer
-        //Being able to shoot water balls
+        /// <summary>
+        /// Tyrant Pathway, Sequence 7, Seafarer, 
+        /// turn a water tile into a water ball and shoot it to the nearest enemy
+        /// CD: 2 seconds
+        /// </summary>
+        /// <param name="player"></param>
         public void WaterBall(Player player)
         {
             Vector2 WaterBallVector = Vector2.Zero; //The initial velocity of water ball projectile
             Vector2 closestWaterTilePosition = Vector2.Zero; //The closest water tile from the player
             Vector2 playerPosition = Main.LocalPlayer.position; //The position of the player
-            Vector2 waterTilePosition = Vector2.Zero; //A temporary storage used in the search for the closest water tile from the player
-            float DistanceFromNPC = float.MaxValue; //The distance from player to a potential target of the water ball projectile
+            Vector2 waterTilePosition; //A temporary storage used in the search for the closest water tile from the player
             float closestWaterTileDistance = float.MaxValue; // The distance from the closest water tile from the player to the player
 
             //Water ball in CD
@@ -171,16 +184,23 @@ namespace LordOfTheMysteriesMod.Buffs
             }
         }
 
-        //Tyrant Pathway, Sequence 7, Seafarer
-        //Glow in water.
+        /// <summary>
+        /// Tyrant Pathway, Sequence 7, Seafarer, 
+        /// Glow in water.
+        /// </summary>
+        /// <param name="player"></param>
         public void WaterLight(Player player) {
             if (player.wet) {
                 Lighting.AddLight(player.position.ToTileCoordinates().X, player.position.ToTileCoordinates().Y, 1f, 1f, 1f);
             }
         }
 
-        //Search for the nearest enemy within a certain distance.
-        //return: The nearest enemy NPC within the range.
+        /// <summary>
+        /// Search for the nearest enemy within a certain distance.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="maxNPCDistance"> The upperbound of the distance between the player and a potential enemy target </param>
+        /// <returns> The nearest enemy NPC within the range maxNPCDistance </returns>
         public static NPC SearchEnemy(Player player, float maxNPCDistance) {
             float minNPCDistance = maxNPCDistance;
             NPC nearestNPC = null;

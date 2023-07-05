@@ -11,7 +11,7 @@ namespace LordOfTheMysteriesMod.Buffs
 {
     public class SeafarerBuff : ModBuff
     {
-        BeyonderAbilities Abilities = new BeyonderAbilities();
+        readonly BeyonderAbilities Abilities = new();
 
         public override void SetStaticDefaults()
         {

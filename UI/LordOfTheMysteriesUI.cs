@@ -10,10 +10,10 @@ namespace LordOfTheMysteriesMod.UI
 {
     public class NoteBookElement : UIElement
     {
-        string texturePath;
+        readonly string texturePath;
 
         public NoteBookElement(string path) {
-            this.texturePath = path;
+            texturePath = path;
         }
 
         protected override void DrawSelf(SpriteBatch spriteBatch)
@@ -45,24 +45,24 @@ namespace LordOfTheMysteriesMod.UI
         public override void OnInitialize() 
         {
             NoteBookElement Cover = new NoteBookElement("LordOfTheMysteriesMod/UI/NotebookCover");
-            Cover.Width.Set(568f, 0f);
-            Cover.Height.Set(488f, 0f);
-            Cover.Left.Set(-284f, 0.5f);
-            Cover.Top.Set(-244f, 0.5f);
+            Cover.Width.Set(900f, 0f);
+            Cover.Height.Set(600f, 0f);
+            Cover.Left.Set(-450f, 0.5f);
+            Cover.Top.Set(-300f, 0.5f);
             Append(Cover);
 
             NoteBookElement leftPage = new NoteBookElement("LordOfTheMysteriesMod/UI/NotebookLeftPage");
-            leftPage.Width.Set(258f, 0f);
-            leftPage.Height.Set(438f, 0f);
-            leftPage.Left.Set(-258f, 0.5f);
-            leftPage.Top.Set(25f, 0f);
+            leftPage.Width.Set(440f, 0f);
+            leftPage.Height.Set(580f, 0f);
+            leftPage.Left.Set(-440f, 0.5f);
+            leftPage.Top.Set(10f, 0f);
             Cover.Append(leftPage);
 
             NoteBookElement rightPage = new NoteBookElement("LordOfTheMysteriesMod/UI/NotebookRightPage");
-            rightPage.Width.Set(258f, 0f);
-            rightPage.Height.Set(438f, 0f);
+            rightPage.Width.Set(440f, 0f);
+            rightPage.Height.Set(580f, 0f);
             rightPage.Left.Set(0f, 0.5f);
-            rightPage.Top.Set(25f, 0f);
+            rightPage.Top.Set(10f, 0f);
             Cover.Append(rightPage);
 
             UIImageButton closeButton = new UIImageButton(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/ButtonDelete"));
