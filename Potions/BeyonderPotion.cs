@@ -4,7 +4,6 @@ using Terraria;
 using LordOfTheMysteriesMod.Buffs;
 
 using Terraria.DataStructures;
-using System.Diagnostics;
 
 namespace LordOfTheMysteriesMod.Potions
 {
@@ -39,14 +38,14 @@ namespace LordOfTheMysteriesMod.Potions
             //of survival will decrease...
             if (player.GetModPlayer<LordOfTheMysteriesModPlayer>().Pathway.Equals("")) {
                 if (Sequence < 6) {
-                    player.KillMe(PlayerDeathReason.ByCustomReason("You lost control and died."), 1.0, 0, false);
+                    KillPlayer(player);
                 } else {
                     int BaseSurvivePossibility = 80;
                     double Factor = Math.Pow(0.25, 9 - Sequence);
                     bool AdvancementResult = BeyonderPotion.Roll(BaseSurvivePossibility, Factor);
                     
                     if (!AdvancementResult) {
-                        player.KillMe(PlayerDeathReason.ByCustomReason("You lost control and died."), 1.0, 0, false);
+                        KillPlayer(player);
                     } else {
                         player.GetModPlayer<LordOfTheMysteriesModPlayer>().Pathway = Pathway;
                         player.GetModPlayer<LordOfTheMysteriesModPlayer>().SequenceName = SequenceName;
@@ -58,15 +57,14 @@ namespace LordOfTheMysteriesMod.Potions
                 }
             } else if (player.GetModPlayer<LordOfTheMysteriesModPlayer>().Pathway.Equals(Pathway) && player.GetModPlayer<LordOfTheMysteriesModPlayer>().Sequence > Sequence) {
                 if (player.GetModPlayer<LordOfTheMysteriesModPlayer>().Sequence > 5 && Sequence < 5) {
-                    player.KillMe(PlayerDeathReason.ByCustomReason("You lost control and died."), 1.0, 0, false);
+                    KillPlayer(player);
                 } else {
-                    
                     int BaseSurvivePossibility = 80;
                     double Factor = Math.Pow(0.25, player.GetModPlayer<LordOfTheMysteriesModPlayer>().Sequence - Sequence - 1);
                     bool AdvancementResult = Roll(BaseSurvivePossibility, Factor);
 
                     if (!AdvancementResult) {
-                        player.KillMe(PlayerDeathReason.ByCustomReason("You lost control and died."), 1.0, 0, false);
+                        KillPlayer(player);
                     } else {
                         player.ClearBuff(player.GetModPlayer<LordOfTheMysteriesModPlayer>().BeyonderBuff);
                         player.GetModPlayer<LordOfTheMysteriesModPlayer>().Pathway = Pathway;
@@ -80,10 +78,11 @@ namespace LordOfTheMysteriesMod.Potions
             }
         }
 
-        //Add beyonder abilities of the potion to the player beyonder ability list.
-        //Parameter: player: The player who just took the potion. 
-        //           PotionBeyonderAbilities: A string array containing names of beyonder abilities given by the potion.
-        //Return: void
+        /// <summary>
+        /// Add beyonder abilities of the potion to the player beyonder ability list.
+        /// </summary>
+        /// <param name="player">The player who just took the potion</param>
+        /// <param name="PotionBeyonderAbilities">A string array containing names of beyonder abilities given by the potion</param>
         public static void AddBeyonderAbilities(Player player, string[] PotionBeyonderAbilities)
         {
             for (int i = 0; i < PotionBeyonderAbilities.Length; i++) {
@@ -94,6 +93,19 @@ namespace LordOfTheMysteriesMod.Potions
                     }
                 }
             }    
+        }
+
+        /// <summary>
+        /// If the player drinks the potion and failed to advance, kill the player and clear up his beyonder status.
+        /// </summary>
+        /// <param name="player">The player who just took the potion</param>
+        public static void KillPlayer(Player player) {
+            player.GetModPlayer<LordOfTheMysteriesModPlayer>().Pathway = "";
+            player.GetModPlayer<LordOfTheMysteriesModPlayer>().SequenceName = "";
+            player.GetModPlayer<LordOfTheMysteriesModPlayer>().Sequence = 10;
+            player.GetModPlayer<LordOfTheMysteriesModPlayer>().BeyonderBuff = 0;
+            player.GetModPlayer<LordOfTheMysteriesModPlayer>().AbilityList.Clear();
+            player.KillMe(PlayerDeathReason.ByCustomReason("You lost control and died."), 1.0, 0, false);
         }
     }
 }

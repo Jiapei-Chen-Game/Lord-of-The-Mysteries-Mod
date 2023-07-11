@@ -31,11 +31,11 @@ namespace LordOfTheMysteriesMod
         /// <summary>
         /// <para>The index number of the buff that gives the player beyonder abilities.</para> 
         /// </summary>
-        public int BeyonderBuff = 0; //The current Beyonder Buff on the player.
+        public int BeyonderBuff = 0; 
         /// <summary>
         /// <para>The sanity of the player.</para> 
         /// </summary>
-        public int Sanity = 100; //The Sanity of the player.
+        public int Sanity = 100; 
         /// <summary>
         /// <para>The abilities of the player.</para> 
         /// </summary>

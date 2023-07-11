@@ -1,17 +1,18 @@
-using System;
-
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using LordOfTheMysteriesMod;
 
 using Terraria.Localization;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria.DataStructures;
+using Microsoft.Xna.Framework;
 
 namespace LordOfTheMysteriesMod.Buffs
 {
     public class SeerBuff : ModBuff
     {
         readonly BeyonderAbilities Abilities = new();
+        string texturePath = "LordOfTheMysteriesMod/Buffs/SeerBuff";
 
         public override void SetStaticDefaults()
         {
@@ -48,6 +49,12 @@ namespace LordOfTheMysteriesMod.Buffs
             Main.NewText("Player Sequence: " + Main.LocalPlayer.GetModPlayer<LordOfTheMysteriesModPlayer>().Sequence, 255, 255, 255);
 			Main.NewText("Player Pathway: " + Main.LocalPlayer.GetModPlayer<LordOfTheMysteriesModPlayer>().Pathway, 255, 255, 255);
             return true;
+        }
+
+        public override bool PreDraw(SpriteBatch spriteBatch, int buffIndex, ref BuffDrawParams drawParams)
+        {
+            spriteBatch.Draw(ModContent.Request<Texture2D>(texturePath).Value, drawParams.Position, null, Color.White, 0f, Vector2.Zero, 0.2f, SpriteEffects.None, 0f);
+            return false;
         }
     }
 }

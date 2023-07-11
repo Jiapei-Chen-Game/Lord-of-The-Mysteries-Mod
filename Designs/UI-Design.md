@@ -8,7 +8,7 @@ When the player enters the world for the first time, he should have a consumable
 
 The button that can open the notebook UI should be at the top left of the screen. The button should look like a book. The current notebook button looks like the following:
 
-![Notebook Button](UI/ButtonPlay.png)
+![Notebook Button](../UI/ButtonPlay.png)
 
 When the user click the button, the notebook UI should show up at the middle of the screen. The notebook is open and shows two sides at a time.
 
@@ -25,8 +25,6 @@ Section 1:
   The path name will change as soon as the player hears the name of sequence 0 from some NPC. For example: Sailor --> Tyrant
 
 - [x] A picture of the symbol of the pathway the player belongs to
-
-  // TODO: The picture is still blurry. Problem needs to be fixed.
   
 - [ ] Add a frame to the picture
 
@@ -50,9 +48,9 @@ Section 5:
 
 The notebook should have the following features:
 
-- [ ] The player can turn to the next page by clicking the buttom right corner of the right page
+- [x] The player can turn to the next page by clicking the bottom right corner of the right page
 
-- [ ] The player can turn to the previous page by clicking the buttom left corner of the left page
+- [x] The player can turn to the previous page by clicking the bottom left corner of the left page
 
 - [ ] The player can go to different sections by clicking the topics in the menu
 
