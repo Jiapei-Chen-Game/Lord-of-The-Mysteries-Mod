@@ -1,20 +1,18 @@
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Linq;
-using System.Collections.Generic;
+
 using Terraria;
 using Terraria.ID;
-using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.GameContent;
+using Terraria.Localization;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace LordOfTheMysteriesMod.Projectiles
 {
     public class WaterBall : ModProjectile
     {
-        public NPC TargetNPC = null;
-        public bool dash = false;
+        public NPC nearestEnemyNPC = null;
         private Texture2D texture;
 
         public override void SetStaticDefaults() {
@@ -27,27 +25,34 @@ namespace LordOfTheMysteriesMod.Projectiles
 			Projectile.height = 8;
 			Projectile.friendly = true;
 			Projectile.ignoreWater = true;
-            Projectile.tileCollide = true;
-			Projectile.timeLeft = 600;
+			Projectile.timeLeft = 1000;
             Projectile.alpha = 100;
+
             texture = ModContent.Request<Texture2D>("LordOfTheMysteriesMod/Projectiles/WaterBall").Value;
 
             DrawOffsetX = -16;
             DrawOriginOffsetY = -16;
 		}
 
-        public void searchTarget() 
+        private enum AttackState : int {
+            Ready,
+            Dash,
+        };
+        private AttackState State {
+            get { return (AttackState)(int)Projectile.ai[0]; }
+            set { Projectile.ai[0] = (int)value; }
+        }
+
+        public void SearchNearestEnemy(Player player, float MaxNPCDistance) 
         {
-            Vector2 WaterBallVector = new Vector2(0, 0);
-            float DistanceFromNPC = 500;
+            float DistanceFromNPC = MaxNPCDistance;
 
             foreach (var npc in Main.npc) {
                 if (npc.active && !npc.friendly && npc.type != 488) {
-                    Vector2 currVector = npc.Center - Main.player[Projectile.owner].Center;
-                    if (currVector.Length() < DistanceFromNPC) {
-                        TargetNPC = npc;
-                        WaterBallVector = currVector;
-                        DistanceFromNPC = currVector.Length();
+                    float currDistance = (npc.Center - player.Center).Length();
+                    if (currDistance < DistanceFromNPC) {
+                        DistanceFromNPC = currDistance;
+                        nearestEnemyNPC = npc;
                     }
                 }
             }
@@ -55,39 +60,48 @@ namespace LordOfTheMysteriesMod.Projectiles
 
         public override void AI()
         {
-            Dust Dust = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height, Dust.dustWater(), 0f, 0f, 100, default(Color), 3f);
-            
-            if (TargetNPC == null || !TargetNPC.active) {
-                searchTarget();
-                if (TargetNPC == null || !TargetNPC.active) {
-                    Projectile.Kill();
-                }
+            Dust Dust = Dust.NewDustDirect(Projectile.position, Projectile.width, Projectile.height, Dust.dustWater(), 0f, 0f, 100, default, 3f);
+            var player = Main.player[Projectile.owner];
+            float t = (float)Main.time * 0.1f + (float)(2 * Math.PI * Projectile.ai[1] / player.GetModPlayer<LordOfTheMysteriesModPlayer>().WaterBallCount);
+
+            if ((player.Center - Projectile.Center).Length() > 1000) {
+                Projectile.Kill();
             }
 
-            Vector2 TargetVel = Vector2.Normalize(TargetNPC.Center - Projectile.Center);
-            Vector2 UpdateVelocity = Vector2.Normalize(Projectile.velocity + TargetVel * 5.5f) * 5f;
-            
-            //Get three tiles that lie in front of the projectile.
-            Point ProjectileFront1 = (Projectile.Center + Vector2.Normalize(UpdateVelocity) * 23f).ToTileCoordinates();
-            Point ProjectileFront2 = (Projectile.Center + Vector2.Transform(Vector2.Normalize(UpdateVelocity), Matrix.CreateRotationZ(MathHelper.ToRadians(-60))) * 16f).ToTileCoordinates();
-            Point ProjectileFront3 = (Projectile.Center + Vector2.Transform(Vector2.Normalize(UpdateVelocity), Matrix.CreateRotationZ(MathHelper.ToRadians(60))) * 16f).ToTileCoordinates();
+            switch (State) {
+                case AttackState.Ready: {
+                    var targetPos = player.Center + new Vector2(8f * (float)Math.Cos(t), 1f * (float)Math.Sin(t)) * 5f;
+                    Projectile.velocity = Vector2.Normalize(targetPos - Projectile.Center) * 5f + player.velocity;
 
-            //Decide the velocity and rotation of the projectile based on whether there exist blocks in the three tiles.
-            if ((Main.tile[ProjectileFront1.X, ProjectileFront1.Y].HasTile && !Main.tile[ProjectileFront1.X, ProjectileFront1.Y].SkipLiquid) ||
-                (Main.tile[ProjectileFront2.X, ProjectileFront2.Y].HasTile && !Main.tile[ProjectileFront2.X, ProjectileFront2.Y].SkipLiquid) ||
-                (Main.tile[ProjectileFront3.X, ProjectileFront3.Y].HasTile && !Main.tile[ProjectileFront3.X, ProjectileFront3.Y].SkipLiquid)) {
-                if (!Main.tile[ProjectileFront3.X, ProjectileFront3.Y].HasTile) {
-                    Projectile.velocity = Vector2.Transform(UpdateVelocity, Matrix.CreateRotationZ(MathHelper.ToRadians(60)));
-                } else {
-                    Projectile.velocity = Vector2.Transform(UpdateVelocity, Matrix.CreateRotationZ(MathHelper.ToRadians(-60)));
+                    SearchNearestEnemy(player, 500);
+                    if (nearestEnemyNPC != null) {
+                        State = AttackState.Dash;
+                    }
                 }
-            } else {
-                Projectile.velocity = UpdateVelocity;
-            }
-        }    
+                    break;
+                case AttackState.Dash: {
+                    var targetPos = nearestEnemyNPC.position;
+                    Vector2 targetVel = Vector2.Normalize(targetPos - Projectile.Center);
+                    targetVel *= 6f;
+                    float accX = 0.2f;
+                    float accY = 0.1f;
+                    Projectile.velocity.X += (Projectile.velocity.X < targetVel.X ? 1 : -1) * accX;
+                    Projectile.velocity.Y += (Projectile.velocity.Y < targetVel.Y ? 1 : -1) * accY;
 
-        public override void Kill(int timeLeft) 
-        {
+                    if (nearestEnemyNPC == null || !nearestEnemyNPC.active) {
+                        State = AttackState.Ready;
+                    }
+                }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override void Kill(int timeLeft) {
+            var player = Main.player[Projectile.owner];
+            player.GetModPlayer<LordOfTheMysteriesModPlayer>().WaterBallCount -= 1;
+            player.GetModPlayer<LordOfTheMysteriesModPlayer>().WaterBallPositions[(int)Projectile.ai[1]] = false;
             Main.tile[Projectile.position.ToTileCoordinates().X, Projectile.position.ToTileCoordinates().Y].LiquidAmount = 255;
             WorldGen.SquareTileFrame(Projectile.position.ToTileCoordinates().X, Projectile.position.ToTileCoordinates().Y, true);
         }

@@ -1,11 +1,8 @@
-using System;
-
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using LordOfTheMysteriesMod.Buffs;
 
-using Terraria.DataStructures;
 using Terraria.Localization;
 
 namespace LordOfTheMysteriesMod.Potions
@@ -16,7 +13,7 @@ namespace LordOfTheMysteriesMod.Potions
 		public int Sequence = 7;
 		public string SequenceName = "Seafarer";
 		public string Pathway = "Sailor";
-		public string[] Abilities = {"EnhancedBreathing", "FastSwimming", "NightVision", "RagingBlow", "SeafarerSense", "WaterBall", "WaterLight"};
+		public string[] Abilities = {"Swimmer", "NightVision", "RagingBlow", "SeafarerSense", "WaterBall", "Bioluminescence"};
 
 		public override void SetStaticDefaults()
 		{

@@ -11,7 +11,7 @@ namespace LordOfTheMysteriesMod.Buffs
 {
     public class SeerBuff : ModBuff
     {
-        readonly BeyonderAbilities Abilities = new();
+        // readonly BeyonderAbilities Abilities = new();
         string texturePath = "LordOfTheMysteriesMod/Buffs/SeerBuff";
 
         public override void SetStaticDefaults()
@@ -35,7 +35,7 @@ namespace LordOfTheMysteriesMod.Buffs
 
             //Spirit Vision...Maybe I can find a better way to do this in the future.
             //Being able to master Divination methods...
-            Abilities.UpdateBeyonderAbilities(player);
+            BeyonderAbilities.UpdateBeyonderAbilities(player);
             
             //Make sure that this buff will never be removed...at least for now.
             player.buffTime[buffIndex] = 1;

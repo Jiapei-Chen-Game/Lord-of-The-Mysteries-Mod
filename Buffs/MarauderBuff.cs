@@ -11,7 +11,7 @@ namespace LordOfTheMysteriesMod.Buffs
 {
     public class MarauderBuff : ModBuff
     {
-        readonly BeyonderAbilities Abilities = new();
+        // readonly BeyonderAbilities Abilities = new();
         string texturePath = "LordOfTheMysteriesMod/Buffs/MarauderBuff";
 
         public override void SetStaticDefaults()
@@ -33,7 +33,7 @@ namespace LordOfTheMysteriesMod.Buffs
             player.moveSpeed += 0.15f;
 
             //Being able to open a wooden chest.
-            Abilities.UpdateBeyonderAbilities(player);
+            BeyonderAbilities.UpdateBeyonderAbilities(player);
             
             //Make sure that this buff will never be removed...at least for now.
             player.buffTime[buffIndex] = 2;

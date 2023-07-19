@@ -40,9 +40,9 @@ namespace LordOfTheMysteriesMod.Potions
                 if (Sequence < 6) {
                     KillPlayer(player);
                 } else {
-                    int BaseSurvivePossibility = 80;
+                    int BaseSurvivePossibility = 100;
                     double Factor = Math.Pow(0.25, 9 - Sequence);
-                    bool AdvancementResult = BeyonderPotion.Roll(BaseSurvivePossibility, Factor);
+                    bool AdvancementResult = Roll(BaseSurvivePossibility, Factor);
                     
                     if (!AdvancementResult) {
                         KillPlayer(player);
@@ -59,7 +59,7 @@ namespace LordOfTheMysteriesMod.Potions
                 if (player.GetModPlayer<LordOfTheMysteriesModPlayer>().Sequence > 5 && Sequence < 5) {
                     KillPlayer(player);
                 } else {
-                    int BaseSurvivePossibility = 80;
+                    int BaseSurvivePossibility = 100;
                     double Factor = Math.Pow(0.25, player.GetModPlayer<LordOfTheMysteriesModPlayer>().Sequence - Sequence - 1);
                     bool AdvancementResult = Roll(BaseSurvivePossibility, Factor);
 

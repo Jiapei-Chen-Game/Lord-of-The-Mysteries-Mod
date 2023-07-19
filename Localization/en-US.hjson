@@ -1,0 +1,132 @@
+Mods: {
+    LordOfTheMysteriesMod: {
+        BeyonderAbilities: {
+            Swimmer: {
+                Title: Swimmer
+                Description: 
+                '''
+                Sailors are excellent 
+                swimmers. 
+                You can swim in water 
+                swiftly like a fish.
+                You can also hold your 
+                breath longer under 
+                water.
+                '''
+                Settings: {
+                    Index: null
+                }
+            }
+
+            NightVision: {
+                Title: Night Vision
+                Description: 
+                '''
+                Sailors have a good 
+                vision even in 
+                darkness.
+                You can see further 
+                when there is light 
+                source nearby in 
+                darkness.
+                '''
+                Settings: {
+                    Index: null
+                }
+            }
+
+            RagingBlow: {
+                Title: Raging Blow
+                Description:
+                '''
+                Folks of Rage are more 
+                powerful when they are 
+                angry.
+                In the next 10 seconds, 
+                your melee attack will 
+                cause more damage.
+                CD: 60 seconds
+                '''
+                Settings: {
+                    Index: Mode
+                    Mode: {
+                        Auto:
+                        ''' 
+                        RagingBlow will be activated when you
+                        hits an enemy when his melee weapon.
+                        '''
+                        Manual:
+                        '''
+                        RagingBlow will be activated when you 
+                        activates it with the beyonder ability 
+                        button.
+                        '''
+                    }
+                }
+            }
+
+            SeafarerSense: {
+                Title: Seafarer Sense
+                Description:
+                '''
+                Seafarers are good 
+                astronomers and 
+                geographers.
+                You can accurately 
+                tell the weather and 
+                the direction by 
+                instinct.
+                '''
+                Settings: {
+                    Index: null
+                }
+            }
+
+            WaterBall: {
+                Title: Water Ball
+                Description:
+                '''
+                Seafarer can cast 
+                water-related spells.
+                You can create a 
+                waterball from 
+                surrouding water 
+                and shoot it to your 
+                enemies.
+                '''
+                Settings: {
+                    Index: Mode
+                    Mode: {
+                        Auto:
+                        ''' 
+                        You will automatically convert water 
+                        into water balls, collect the water 
+                        balls, and shoot them to your enemies.
+                        '''
+                        Manual:
+                        '''
+                        You can collect waterballs by pressing 
+                        the beyonder ability button. You can 
+                        shoot them towards the position of your 
+                        clicker.
+                        '''
+                    }
+                }
+            }
+
+            Bioluminescence: {
+                Title: Bioluminescence
+                Description:
+                '''
+                Seafarer can cast 
+                water-related spells.
+                You can emit light 
+                under water.
+                '''
+                Settings: {
+                    Index: null
+                }
+            }
+        }
+    }
+}

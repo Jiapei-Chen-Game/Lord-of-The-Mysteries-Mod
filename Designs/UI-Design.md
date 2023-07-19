@@ -30,11 +30,11 @@ Section 1:
 
 Section 2:
 
-- [ ] The menu of the book that can lead the player to different pages
+- [x] The menu of the book that can lead the player to different pages
 
 Section 3:
 
-- [ ] The beyonder abilities of the player
+- [x] The beyonder abilities of the player
 
   The player can go over detailed information of his beyonder abilities by hovering his mouse over the corresponding icon of a certain ability. If he wishes to change the setting of the ability, he can click on the icon to the setting page of the ability.
 
@@ -52,8 +52,8 @@ The notebook should have the following features:
 
 - [x] The player can turn to the previous page by clicking the bottom left corner of the left page
 
-- [ ] The player can go to different sections by clicking the topics in the menu
+- [x] The player can go to different sections by clicking the topics in the menu
 
 - [ ] The player can go back to the the menu by clicking the bookmark at the top left of the book
 
-- [ ] The player can leave the notebook by clicking the delete button at the top right of the book at each page
+- [x] The player can leave the notebook by clicking the delete button at the top right of the book at each page

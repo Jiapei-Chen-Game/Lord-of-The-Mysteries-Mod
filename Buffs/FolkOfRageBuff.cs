@@ -11,7 +11,7 @@ namespace LordOfTheMysteriesMod.Buffs
 {
     public class FolkOfRageBuff : ModBuff
     {
-        readonly BeyonderAbilities Abilities = new();
+        // readonly BeyonderAbilities Abilities = new();
         string texturePath = "LordOfTheMysteriesMod/Buffs/FolkOfRageBuff";
         
         public override void SetStaticDefaults()
@@ -33,7 +33,7 @@ namespace LordOfTheMysteriesMod.Buffs
             player.moveSpeed += 0.3f;
 
             //Being able to stay underwater for more than 10 minutes.
-            Abilities.UpdateBeyonderAbilities(player);
+            BeyonderAbilities.UpdateBeyonderAbilities(player);
             
             //Make sure that this buff will never be removed...at least for now.
             player.buffTime[buffIndex] = 1;

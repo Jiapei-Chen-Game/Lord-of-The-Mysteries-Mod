@@ -1,4 +1,7 @@
 using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
@@ -8,7 +11,9 @@ using Terraria;
 using Terraria.UI;
 using Terraria.ModLoader;
 using Terraria.GameContent.UI.Elements;
-using System.Linq;
+
+using Hjson;
+using Terraria.Localization;
 
 namespace LordOfTheMysteriesMod.UI
 {
@@ -71,12 +76,12 @@ namespace LordOfTheMysteriesMod.UI
     {
         public string imagePath;
         public string text;
-        public int DetailedPageIndex;
-        public NoteBookBeyonderAbilityThumbNail(string text, int DetailedPageIndex, string imagePath = "LordOfTheMysteriesMod/UI/UIImages/TestImage")
+        public List<UIElement> DetailedPage;
+        public NoteBookBeyonderAbilityThumbNail(string text, List<UIElement> DetailedPage, string imagePath = "LordOfTheMysteriesMod/UI/UIImages/TestImage")
         {
             this.imagePath = imagePath;
             this.text = text;
-            this.DetailedPageIndex = DetailedPageIndex;
+            this.DetailedPage = DetailedPage;
         }
 
         public string GetText() {
@@ -86,22 +91,20 @@ namespace LordOfTheMysteriesMod.UI
 
     public class NoteBookUI : UIState
     {
-        public static bool DEBUG = false;
+        public static bool DEBUG = true;
 
         public static bool Visible = false;
         public static bool[] PageVisible = new bool[256];
-        public static List<UIElement>[] Pages = new List<UIElement>[512];
         public static int currentPageNumber = 0;
         public static int PageNumber = 0;
 
-        public static int PlayerAbilitySectionTitleIndex = 2;
-        public static int PlayerAbilitySectionBegin = PlayerAbilitySectionTitleIndex + 1;
-        public static int PlayerAbilitySectionEnd = PlayerAbilitySectionBegin + 1;
-        public static int PlayerAbilitySectionDetailedBegin = PlayerAbilitySectionBegin + 1;
-        public static int PlayerAbilitySectionDetailedEnd = PlayerAbilitySectionDetailedBegin + 1;
-        public static int PotionFormulaSectionTitleIndex = PlayerAbilitySectionDetailedEnd;
-        public static int PotionFormulaSectionBegin = PotionFormulaSectionTitleIndex + 1;
-        public static int PotionFormulaSectionEnd = PotionFormulaSectionBegin + 1;
+        public static List<List<UIElement>> PlayerBasicBeyonderInformation = new();
+        public static List<List<UIElement>> NoteBookMenu = new();
+        public static List<List<UIElement>> PlayerAbilityThumbNailSection = new();
+        public static List<List<UIElement>> PlayerAbilityDetailedPageSection = new();
+        public static List<List<UIElement>> PotionFormulaThumbNailSection = new();
+        public static List<List<UIElement>> PotionFormulaDetailedPageSection = new();
+        public static List<List<UIElement>> PlayerNoteSection = new();
 
         UIImage Cover = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/NotebookCover"));
 
@@ -117,22 +120,18 @@ namespace LordOfTheMysteriesMod.UI
 
         UIText Page2MenuTitle = new("Menu", large: true);
         UIText Page2MenuPlayerBeyonderAbilities = new("1. My Beyonder Abilities");
-        UIText Page2MenuPotionFormula = new("2. Potion Formulas and Advancement Rituals");
+        UIText Page2MenuPotionFormula = new("2. Potion Formulas");
         UIText Page2MenuPlayerNotes = new("3. My Notes");
 
         UIImageButton closeButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/ButtonDelete"));
-        UIImageButton nextPageButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/ButtonDelete"));
-        UIImageButton previousPageButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/ButtonDelete"));
+        UIImageButton nextPageButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/ButtonNextPage"));
+        UIImageButton previousPageButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/ButtonPreviousPage"));
 
         public override void OnInitialize()
         {
             Player player = Main.CurrentPlayer;
 
             PageVisible[0] = true;
-
-            for (int i = 0; i < Pages.Length; i++) {
-                Pages[i] = new List<UIElement>();
-            }
 
             Cover.Width.Set(900f, 0f);
             Cover.Height.Set(600f, 0f);
@@ -141,80 +140,89 @@ namespace LordOfTheMysteriesMod.UI
             Append(Cover);
 
             Cover.Append(LeftPage);
+            Cover.Append(RightPage);
 
-            LeftPage.Append(LeftPageNumber);
-            LeftPageNumber.SetText((2 * currentPageNumber + 1).ToString());
-            LeftPageNumber.HAlign = 0.5f;
-            LeftPageNumber.Top.Set(-60f, 1f);
+            PlayerBasicBeyonderInformation.Add(new List<UIElement>());
 
-            Pages[0].Add(Page1PlayerPathSymbol);
+            PlayerBasicBeyonderInformation[0].Add(Page1PlayerPathSymbol);
             Page1PlayerPathSymbol.Width.Set(160f, 0f);
             Page1PlayerPathSymbol.Height.Set(160f, 0f);
             Page1PlayerPathSymbol.HAlign = 0.5f;
             Page1PlayerPathSymbol.Top.Set(120f, 0f);
 
-            Pages[0].Add(Page1PlayerPathInformation);
+            PlayerBasicBeyonderInformation[0].Add(Page1PlayerPathInformation);
             Page1PlayerPathInformation.HAlign = 0.5f;
             Page1PlayerPathInformation.Top.Set(0, 0.5f);
 
-            Pages[0].Add(Page1PlayerSequenceInformation);
+            PlayerBasicBeyonderInformation[0].Add(Page1PlayerSequenceInformation);
             Page1PlayerSequenceInformation.HAlign = 0.5f;
             Page1PlayerSequenceInformation.Top.Set(30f, 0.5f);
 
-            Pages[0].Add(Page1PlayerSequenceNameInformation);
+            PlayerBasicBeyonderInformation[0].Add(Page1PlayerSequenceNameInformation);
             Page1PlayerSequenceNameInformation.HAlign = 0.5f;
             Page1PlayerSequenceNameInformation.Top.Set(60f, 0.5f);
 
-            for (int i = 0; i < Pages[0].Count; i++) {
-                LeftPage.Append(Pages[0][i]);
-            }
+            NoteBookMenu.Add(new List<UIElement>());
 
-            Cover.Append(RightPage);
-
-            RightPage.Append(RightPageNumber);
-            RightPageNumber.SetText((2 * currentPageNumber + 2).ToString());
-            RightPageNumber.HAlign = 0.5f;
-            RightPageNumber.Top.Set(-60f, 1f);
-
-            Pages[1].Add(Page2MenuTitle);
+            NoteBookMenu[0].Add(Page2MenuTitle);
             Page2MenuTitle.Top.Set(80f, 0);
             Page2MenuTitle.HAlign = 0.5f;
 
-            Pages[1].Add(Page2MenuPlayerBeyonderAbilities);
+            NoteBookMenu[0].Add(Page2MenuPlayerBeyonderAbilities);
             Page2MenuPlayerBeyonderAbilities.Top.Set(150f, 0);
-            Page2MenuPlayerBeyonderAbilities.MarginLeft = 30f;
+            Page2MenuPlayerBeyonderAbilities.MarginLeft = 60f;
             Page2MenuPlayerBeyonderAbilities.OnClick += (evt, element) => {
+                PageVisible[currentPageNumber] = false;
                 currentPageNumber = 1;
+                PageVisible[currentPageNumber] = true;
             };
-            
-            Pages[1].Add(Page2MenuPotionFormula);
+
+            NoteBookMenu[0].Add(Page2MenuPotionFormula);
             Page2MenuPotionFormula.Top.Set(200f, 0);
-            Page2MenuPotionFormula.MarginLeft = 30f;
+            Page2MenuPotionFormula.MarginLeft = 60f;
             Page2MenuPotionFormula.OnClick += (evt, element) => {
-                currentPageNumber = (PlayerAbilitySectionEnd + 1) / 2;
+                PageVisible[currentPageNumber] = false;
+                currentPageNumber = (PlayerBasicBeyonderInformation.Count +
+                                     NoteBookMenu.Count +
+                                     PlayerAbilityThumbNailSection.Count +
+                                     PlayerAbilityDetailedPageSection.Count) / 2;
+                PageVisible[currentPageNumber] = true;
             };
 
-            Pages[1].Add(Page2MenuPlayerNotes);
+            NoteBookMenu[0].Add(Page2MenuPlayerNotes);
             Page2MenuPlayerNotes.Top.Set(250f, 0);
-            Page2MenuPlayerNotes.MarginLeft = 30f;
+            Page2MenuPlayerNotes.MarginLeft = 60f;
             Page2MenuPlayerNotes.OnClick += (evt, element) => {
-                Main.NewText("Beyonder Abilities!", 255, 255, 255);
+                PageVisible[currentPageNumber] = false;
+                currentPageNumber = (PlayerBasicBeyonderInformation.Count +
+                                     NoteBookMenu.Count +
+                                     PlayerAbilityThumbNailSection.Count +
+                                     PlayerAbilityDetailedPageSection.Count +
+                                     PotionFormulaThumbNailSection.Count +
+                                     PotionFormulaDetailedPageSection.Count) / 2;
+                PageVisible[currentPageNumber] = true;
             };
 
-            for (int i = 0; i < Pages[1].Count; i++) {
-                RightPage.Append(Pages[1][i]);
-            }
+            PlayerAbilityThumbNailSection.Add(new List<UIElement>());
 
             UIText PlayerAbilitySectionTitleText = new("Beyonder Abilities", 1.5f);
-            Pages[PlayerAbilitySectionTitleIndex].Add(PlayerAbilitySectionTitleText);
+            PlayerAbilityThumbNailSection[0].Add(PlayerAbilitySectionTitleText);
             PlayerAbilitySectionTitleText.HAlign = 0.5f;
             PlayerAbilitySectionTitleText.VAlign = 0.5f;
 
+            PlayerAbilityThumbNailSection.Add(new List<UIElement>());
+
+            PotionFormulaThumbNailSection.Add(new List<UIElement>());
+
             UIText PotionFormulaSectionTitleText = new("Potion Formulas", 1.5f);
-            Pages[PotionFormulaSectionTitleIndex].Add(PotionFormulaSectionTitleText);
+            PotionFormulaThumbNailSection[0].Add(PotionFormulaSectionTitleText);
             PotionFormulaSectionTitleText.HAlign = 0.5f;
             PotionFormulaSectionTitleText.VAlign = 0.5f;
- 
+
+            PotionFormulaThumbNailSection.Add(new List<UIElement>());
+
+            PlayerNoteSection.Add(new List<UIElement>());
+
             closeButton.Width.Set(32f, 0f);
             closeButton.Height.Set(32f, 0f);
             closeButton.Left.Set(-90f, 1f);
@@ -226,8 +234,9 @@ namespace LordOfTheMysteriesMod.UI
 
             nextPageButton.Width.Set(32f, 0f);
             nextPageButton.Height.Set(32f, 0f);
-            nextPageButton.Left.Set(-90f, 1f);
-            nextPageButton.Top.Set(-60f, 1f);
+            nextPageButton.Left.Set(381f, 0.5f);
+            nextPageButton.Top.Set(258f, 0.5f);
+            nextPageButton.SetVisibility(1.0f, 0.8f);
             nextPageButton.OnClick += (evt, element) => {
                 if (currentPageNumber < PageVisible.Length - 1) {
                     PageVisible[currentPageNumber] = false;
@@ -239,8 +248,9 @@ namespace LordOfTheMysteriesMod.UI
 
             previousPageButton.Width.Set(32f, 0f);
             previousPageButton.Height.Set(32f, 0f);
-            previousPageButton.Left.Set(58f, 0f);
-            previousPageButton.Top.Set(-60f, 1f);
+            previousPageButton.Left.Set(-413f, 0.5f);
+            previousPageButton.Top.Set(258f, 0.5f);
+            previousPageButton.SetVisibility(1.0f, 0.8f);
             previousPageButton.OnClick += (evt, element) => {
                 if (currentPageNumber > 0) {
                     PageVisible[currentPageNumber] = false;
@@ -249,6 +259,26 @@ namespace LordOfTheMysteriesMod.UI
                 }
             };
             Cover.Append(previousPageButton);
+
+            List<UIElement>[] initialPages = ToPage(currentPageNumber);
+
+            LeftPage.Append(LeftPageNumber);
+            LeftPageNumber.SetText((2 * currentPageNumber + 1).ToString());
+            LeftPageNumber.HAlign = 0.5f;
+            LeftPageNumber.Top.Set(-60f, 1f);
+
+            RightPage.Append(RightPageNumber);
+            RightPageNumber.SetText((2 * currentPageNumber + 2).ToString());
+            RightPageNumber.HAlign = 0.5f;
+            RightPageNumber.Top.Set(-60f, 1f);
+
+            for (int i = 0; i < initialPages[0].Count; i++) {
+                LeftPage.Append(initialPages[0][i]);
+            }
+
+            for (int i = 0; i < initialPages[1].Count; i++) {
+                RightPage.Append(initialPages[1][i]);
+            }
         }
 
         public override void Update(GameTime gametime) {
@@ -278,21 +308,20 @@ namespace LordOfTheMysteriesMod.UI
 
             // If the player is viewing beyonder abilities thumbnail/menu section, then update the corresponding
             // information based on player beyonder abilities accordingly
-            if (CheckSectionPageVisibility(PlayerAbilitySectionBegin / 2, (PlayerAbilitySectionEnd + 1) / 2)) {
+            if (CheckSectionPageVisibility(ToPageVisibilityIndex(0, PlayerAbilityThumbNailSection), 255)) {
                 Dictionary<string, Action<Player>> playerAbilityDictionary = player.AbilityList;
-                int currentAbilitySectionIndex = PlayerAbilitySectionBegin;
-                int currentDetailedAbilitySectionIndex = PlayerAbilitySectionDetailedBegin;
+                int currentAbilitySectionIndex = 1;
 
                 // Check every beyonder ability thumbnail. If there exists a thumbnail whose corresponding beyonder
                 // ability is not currently owned by the player, then remove the thumbnail from Pages.
-                for (int i = PlayerAbilitySectionBegin; i < PlayerAbilitySectionEnd; i++) {
-                    int removeNumber = Pages[i].RemoveAll(item =>
+                for (int i = 1; i < PlayerAbilityThumbNailSection.Count; i++) {
+                    int removeNumber = PlayerAbilityThumbNailSection[i].RemoveAll(item =>
                     {
                         NoteBookBeyonderAbilityThumbNail textItem = (NoteBookBeyonderAbilityThumbNail)item;
                         // When the thumbnail is removed from Pages, its corresponding detailed page should also
                         // be removed.
                         if (!playerAbilityDictionary.ContainsKey(textItem.GetText())) {
-                            Pages[textItem.DetailedPageIndex].Clear();
+                            PlayerAbilityDetailedPageSection.Remove(textItem.DetailedPage);
                             return true;
                         }
                         return false;
@@ -300,46 +329,57 @@ namespace LordOfTheMysteriesMod.UI
                     // If there is any thumbnail removed, then we need an update
                     if (removeNumber > 0) {
                         needsUpdate = true;
-                        if (Pages[i].Count == 0) {
-                            RemovePage(i);
+                        if (PlayerAbilityThumbNailSection[i].Count == 0 && i > 1) {
+                            PlayerAbilityThumbNailSection.RemoveAt(i);
                         }
                     }
                 }
 
-                if (DEBUG) {
-                    Main.NewText("PlayerAbilitySectionBegin: " + PlayerAbilitySectionBegin + " PlayerAbilitySectionEnd: " + PlayerAbilitySectionEnd);
-                }
-
                 foreach (string key in playerAbilityDictionary.Keys) {
                     bool containsKey = false;
-                    
-                    for (int i = PlayerAbilitySectionBegin; i < PlayerAbilitySectionEnd; i++) {
-                        foreach (NoteBookBeyonderAbilityThumbNail element in Pages[i].Cast<NoteBookBeyonderAbilityThumbNail>()) {
+
+                    for (int i = 1; i < PlayerAbilityThumbNailSection.Count; i++) {
+                        foreach (NoteBookBeyonderAbilityThumbNail element in PlayerAbilityThumbNailSection[i].Cast<NoteBookBeyonderAbilityThumbNail>()) {
                             if (element is not null && element.GetText().Equals(key)) {
                                 containsKey = true;
                                 break;
                             }
                         }
-
                         if (containsKey) {
                             break;
                         }
-
                     }
 
                     if (!containsKey) {
-                        
-                        if (Pages[currentAbilitySectionIndex].Count == 4) {
-                            currentAbilitySectionIndex += 1;
-                            InsertPage(currentAbilitySectionIndex);
+
+                        //Add a beyonder ability thumbnail to the notebook
+                        if (PlayerAbilityThumbNailSection[currentAbilitySectionIndex].Count == 4) {
+                            int previousAbilitySectionIndex = currentAbilitySectionIndex;
+                            for (int i = currentAbilitySectionIndex; i < PlayerAbilityThumbNailSection.Count; i++) {
+                                if (PlayerAbilityThumbNailSection[i].Count < 4) {
+                                    currentAbilitySectionIndex = i;
+                                    break;
+                                }
+                            }
+                            if (currentAbilitySectionIndex == previousAbilitySectionIndex) {
+                                PlayerAbilityThumbNailSection.Add(new List<UIElement>());
+                                currentAbilitySectionIndex = PlayerAbilityThumbNailSection.Count - 1;
+                            }
                         }
 
-                        NoteBookBeyonderAbilityThumbNail AbilityTextPanel = new(key, currentDetailedAbilitySectionIndex);
+                        List<UIElement> newPlayerAbilityDetailedPage = new();
+                        NoteBookBeyonderAbilityThumbNail AbilityTextPanel = new(key, newPlayerAbilityDetailedPage);
+
+                        PlayerAbilityDetailedPageSection.Add(AbilityTextPanel.DetailedPage);
+
                         AbilityTextPanel.Width.Set(320f, 0f);
                         AbilityTextPanel.Height.Set(100f, 0f);
-                        
+                        AbilityTextPanel.MarginLeft = 60f;
+
                         AbilityTextPanel.OnClick += (evt, element) => {
-                            currentPageNumber = AbilityTextPanel.DetailedPageIndex / 2;
+                            PageVisible[currentPageNumber] = false;
+                            currentPageNumber = ToPageVisibilityIndex(PlayerAbilityDetailedPageSection.IndexOf(AbilityTextPanel.DetailedPage), PlayerAbilityDetailedPageSection);
+                            PageVisible[currentPageNumber] = true;
                         };
 
                         UIImage image = new(ModContent.Request<Texture2D>(AbilityTextPanel.imagePath));
@@ -355,31 +395,35 @@ namespace LordOfTheMysteriesMod.UI
                         title.Left.Set(100f, 0f);
                         title.VAlign = 0.5f;
 
-                        AbilityTextPanel.Top.Set(100f * Pages[currentAbilitySectionIndex].Count + 90f, 0);
-                        Pages[currentAbilitySectionIndex].Add(AbilityTextPanel);
-                        AbilityTextPanel.MarginLeft = 60f;
+                        AbilityTextPanel.Top.Set(100f * PlayerAbilityThumbNailSection[currentAbilitySectionIndex].Count + 90f, 0);
+                        PlayerAbilityThumbNailSection[currentAbilitySectionIndex].Add(AbilityTextPanel);
 
-                        currentDetailedAbilitySectionIndex += 1;
+                        // Add the detailed page to the notebook
+
+                        AppendDetailedBeyonderAbilityPage(AbilityTextPanel, key);
+
                         needsUpdate = true;
                     }
                 }
             }
 
             // Update the displayed page when the current page is changed.
-            if (PageNumber != currentPageNumber || needsUpdate) {
+            if (currentPageNumber < PageVisible.Length && (PageNumber != currentPageNumber || needsUpdate)) {
                 LeftPage.RemoveAllChildren();
                 RightPage.RemoveAllChildren();
 
-                for (int i = 0; i < Pages[2 * currentPageNumber].Count; i++) {
-                    LeftPage.Append(Pages[2 * currentPageNumber][i]);
+                List<UIElement>[] toAppend = ToPage(currentPageNumber);
+
+                foreach (UIElement element in toAppend[0]) {
+                    LeftPage.Append(element);
                 }
                 LeftPage.Append(LeftPageNumber);
                 LeftPageNumber.SetText((2 * currentPageNumber + 1).ToString());
                 LeftPageNumber.HAlign = 0.5f;
                 LeftPageNumber.Top.Set(-60f, 1f);
 
-                for (int i = 0; i < Pages[2 * currentPageNumber + 1].Count; i++) {
-                    RightPage.Append(Pages[2 * currentPageNumber + 1][i]);
+                foreach (UIElement element in toAppend[1]) {
+                    RightPage.Append(element);
                 }
                 RightPage.Append(RightPageNumber);
                 RightPageNumber.SetText((2 * currentPageNumber + 2).ToString());
@@ -387,54 +431,165 @@ namespace LordOfTheMysteriesMod.UI
                 RightPageNumber.Top.Set(-60f, 1f);
 
                 PageNumber = currentPageNumber;
-            }                
+            }
         }
 
         /// <summary>
-        /// Insert a page into Pages.
+        /// Given a PageVisibility index, convert it to two Lists of UIElements of corresponding pages.
         /// </summary>
-        /// <param name="index">The index where the page inserts</param>
-        /// <returns>Returns true if insertion is successful. Otherwise return false.</returns>
-        static public bool InsertPage(int index) {
-            // If index is out of the range of the notebook, return false;
-            if (index < 0 || index >= Pages.Length) {
-                return false;
+        /// <param name="index">A PageVisibility index</param>
+        /// <returns>Returns an array of two Lists of UIElements</returns>
+        private List<UIElement>[] ToPage(int index) {
+
+            int PageNumber = 2 * index + 1;
+            List<UIElement>[] toReturn = { new List<UIElement>(), new List<UIElement>() };
+
+            if (PageNumber > 512 || PageNumber < 1) {
+                return toReturn;
             }
-            // If the notebook is filled, return false.
-            if (Pages[^1].Count > 0) {
-                return false;
+
+            if (PageNumber < PlayerBasicBeyonderInformation.Count) {
+                toReturn[0] = PlayerBasicBeyonderInformation[PageNumber - 1];
+                toReturn[1] = PlayerBasicBeyonderInformation[PageNumber];
+                return toReturn;
+            } else if (PageNumber == PlayerBasicBeyonderInformation.Count) {
+                toReturn[0] = PlayerBasicBeyonderInformation[PageNumber - 1];
+                toReturn[1] = NoteBookMenu[0];
+                return toReturn;
             }
-            // Move every element from index one position backward.
-            for (int i = index; i < Pages.Length - 1; i++) {
-                List<UIElement> list = Pages[i];
-                Pages[i + 1] = list;
+
+            PageNumber -= PlayerBasicBeyonderInformation.Count;
+
+            if (PageNumber < NoteBookMenu.Count) {
+                toReturn[0] = NoteBookMenu[PageNumber - 1];
+                toReturn[1] = NoteBookMenu[PageNumber];
+                return toReturn;
+            } else if (PageNumber == NoteBookMenu.Count) {
+                toReturn[0] = NoteBookMenu[PageNumber - 1];
+                toReturn[1] = PlayerAbilityThumbNailSection[0];
+                return toReturn;
             }
-            // Change the indices that mark the start and end of sections accordingly.
-            ManageSectionIndex(index, 1);
-            Main.NewText("Potion Formula Title Page Index: " + PotionFormulaSectionTitleIndex);
-            Main.NewText("Potion Formula Title Page UIElement number: " + Pages[PotionFormulaSectionTitleIndex].Count);
-            // Insert an empty page at index.
-            Pages[index] = new();
-            return true;
+
+            PageNumber -= NoteBookMenu.Count;
+
+            if (PageNumber < PlayerAbilityThumbNailSection.Count) {
+                toReturn[0] = PlayerAbilityThumbNailSection[PageNumber - 1];
+                toReturn[1] = PlayerAbilityThumbNailSection[PageNumber];
+                return toReturn;
+            } else if (PageNumber == PlayerAbilityThumbNailSection.Count) {
+                toReturn[0] = PlayerAbilityThumbNailSection[PageNumber - 1];
+                if (PlayerAbilityDetailedPageSection.Count > 0) {
+                    toReturn[1] = PlayerAbilityDetailedPageSection[0];
+                } else {
+                    toReturn[1] = PotionFormulaThumbNailSection[0];
+                }
+                return toReturn;
+            }
+
+            PageNumber -= PlayerAbilityThumbNailSection.Count;
+
+            if (PageNumber < PlayerAbilityDetailedPageSection.Count) {
+                toReturn[0] = PlayerAbilityDetailedPageSection[PageNumber - 1];
+                toReturn[1] = PlayerAbilityDetailedPageSection[PageNumber];
+                return toReturn;
+            } else if (PageNumber == PlayerAbilityDetailedPageSection.Count) {
+                toReturn[0] = PlayerAbilityDetailedPageSection[PageNumber - 1];
+                toReturn[1] = PotionFormulaThumbNailSection[0];
+                return toReturn;
+            }
+
+            PageNumber -= PlayerAbilityDetailedPageSection.Count;
+
+            if (PageNumber < PotionFormulaThumbNailSection.Count) {
+                toReturn[0] = PotionFormulaThumbNailSection[PageNumber - 1];
+                toReturn[1] = PotionFormulaThumbNailSection[PageNumber];
+                return toReturn;
+            } else if (PageNumber == PotionFormulaThumbNailSection.Count) {
+                toReturn[0] = PotionFormulaThumbNailSection[PageNumber - 1];
+                if (PotionFormulaDetailedPageSection.Count > 0) {
+                    toReturn[1] = PotionFormulaDetailedPageSection[0];
+                } else {
+                    toReturn[1] = PlayerNoteSection[0];
+                }
+                return toReturn;
+            }
+
+            PageNumber -= PotionFormulaThumbNailSection.Count;
+
+            if (PageNumber < PotionFormulaDetailedPageSection.Count) {
+                toReturn[0] = PotionFormulaDetailedPageSection[PageNumber - 1];
+                toReturn[1] = PotionFormulaDetailedPageSection[PageNumber];
+                return toReturn;
+            } else if (PageNumber == PotionFormulaDetailedPageSection.Count) {
+                toReturn[0] = PotionFormulaDetailedPageSection[PageNumber - 1];
+                toReturn[1] = PlayerNoteSection[0];
+                return toReturn;
+            }
+
+            PageNumber -= PotionFormulaDetailedPageSection.Count;
+
+            if (PageNumber < PlayerNoteSection.Count) {
+                toReturn[0] = PlayerNoteSection[PageNumber - 1];
+                toReturn[1] = PlayerNoteSection[PageNumber];
+                return toReturn;
+            } else if (PageNumber == PlayerNoteSection.Count) {
+                toReturn[0] = PlayerNoteSection[PageNumber - 1];
+                return toReturn;
+            }
+
+            return toReturn;
+
         }
 
         /// <summary>
-        /// Remove a page from Pages.
+        /// Given a page index and a List, convert it to PageVisibility index.
         /// </summary>
-        /// <param name="index">The index where the page is removed</param>
-        /// <returns>Returns true if remove is successful. Otherwise return false.</returns>
-        static public bool RemovePage(int index) {
-            // If index is out of the range of the notebook, return false;
-            if (index < 0 || index >= Pages.Length) {
-                return false;
+        /// <param name="index"> The given page index</param>
+        /// <param name="UIElementList"> The List that contains the page</param>
+        /// <returns>Returns the corresponding PageVisibility index.</returns>
+        private int ToPageVisibilityIndex(int index, List<List<UIElement>> UIElementList) {
+            if (index < 0 || index > UIElementList.Count) {
+                Main.NewText("Index " + index + " is out of bound.");
+                return 0;
             }
-            // Move every element from index one position forward.
-            for (int i = index + 1; i < Pages.Length - 1; i++) {
-                Pages[i] = Pages[i + 1];
+
+            if (ReferenceEquals(UIElementList, PlayerBasicBeyonderInformation)) {
+                return index / 2;
             }
-            // Change the indices that mark the start and end of sections accordingly.
-            ManageSectionIndex(index, -1);
-            return true;
+
+            index += PlayerBasicBeyonderInformation.Count;
+
+            if (ReferenceEquals(UIElementList, NoteBookMenu)) {
+                return index / 2;
+            }
+
+            index += NoteBookMenu.Count;
+
+            if (ReferenceEquals(UIElementList, PlayerAbilityThumbNailSection)) {
+                return index / 2;
+            }
+
+            index += PlayerAbilityThumbNailSection.Count;
+            
+            if (ReferenceEquals(UIElementList, PlayerAbilityDetailedPageSection)) {
+                return index / 2;
+            }
+
+            index += PlayerAbilityDetailedPageSection.Count;
+
+            if (ReferenceEquals(UIElementList, PotionFormulaThumbNailSection)) {
+                return index / 2;
+            }
+
+            index += PotionFormulaThumbNailSection.Count;
+
+            if (ReferenceEquals(UIElementList, PotionFormulaDetailedPageSection)) {
+                return index / 2;
+            }
+
+            index += PotionFormulaDetailedPageSection.Count;
+
+            return index / 2;
         }
 
         /// <summary>
@@ -444,7 +599,7 @@ namespace LordOfTheMysteriesMod.UI
         /// <param name="StartIndex"></param>
         /// <param name="EndIndex"></param>
         /// <returns>Returns true if one of the pages from StartIndex to EndIndex is visible.</returns>
-        static public bool CheckSectionPageVisibility(int StartIndex, int EndIndex) {
+        private bool CheckSectionPageVisibility(int StartIndex, int EndIndex) {
             for (int i = StartIndex; i < EndIndex; i++) {
                 if (PageVisible[i]) {
                     return true;
@@ -458,7 +613,7 @@ namespace LordOfTheMysteriesMod.UI
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        static public string CapitalizeAfterSpace(string input) {
+        private string CapitalizeAfterSpace(string input) {
             string[] words = input.Split(' ');
             for (int i = 0; i < words.Length; i++) {
                 if (string.IsNullOrEmpty(words[i])) continue;
@@ -468,66 +623,134 @@ namespace LordOfTheMysteriesMod.UI
         }
 
         /// <summary>
-        /// <para>When a new page is inserted into the notebook or deleted from the notebook at newPageIndex, increase or decrease</para>
-        /// <para>corresponding fields that records the start index and end index of each section accordingly. At the same time, </para>
-        /// <para>increase or decrease the index of detailed beyonder ability pages accordingly. </para>
+        /// Return the total page number.
         /// </summary>
-        /// <param name="index">The index where there is a change in page</param>
-        /// <param name="increase">If we want to increase a page, it should be 1. Otherwise, it should be -1</param>
-        static public void ManageSectionIndex(int index, int increment) {
-            if (increment >= 0) {
-                increment = 1;
-                if (index <= PotionFormulaSectionEnd) {
-                    PotionFormulaSectionEnd += increment;
-                    if (index <= PotionFormulaSectionBegin) {
-                        PotionFormulaSectionBegin += increment;
-                        PotionFormulaSectionTitleIndex += increment;
-                        PlayerAbilitySectionDetailedEnd += increment;
-                        if (index <= PlayerAbilitySectionDetailedBegin) {
-                            //Update Detailed Beyonder Ability Indices.
-                            for (int i = PlayerAbilitySectionBegin; i < index; i++) {
-                                foreach (NoteBookBeyonderAbilityThumbNail element in Pages[i].Cast<NoteBookBeyonderAbilityThumbNail>()) {
-                                    element.DetailedPageIndex += increment;
-                                }
-                            }
-                            PlayerAbilitySectionDetailedBegin += increment;
-                            PlayerAbilitySectionEnd += increment;
-                            if (index <= PlayerAbilitySectionBegin) {
-                                PlayerAbilitySectionBegin += increment;
-                            }
-                        }
-                    }
-                }
-            } else {
-                increment = -1;
-                if (index < PotionFormulaSectionEnd) {
-                    PotionFormulaSectionEnd += increment;
-                    if (index < PotionFormulaSectionBegin) {
-                        if (PlayerAbilitySectionDetailedEnd - PlayerAbilitySectionDetailedBegin > 1) {
-                            PotionFormulaSectionBegin += increment;
-                            PotionFormulaSectionTitleIndex += increment;
-                            PlayerAbilitySectionDetailedEnd += increment;
-                        }
-                        if (index < PlayerAbilitySectionDetailedBegin) {
-                            if (PlayerAbilitySectionEnd - PlayerAbilitySectionBegin > 1) {
-                                for (int i = PlayerAbilitySectionBegin; i < index; i++) {
-                                    foreach (NoteBookBeyonderAbilityThumbNail element in Pages[i].Cast<NoteBookBeyonderAbilityThumbNail>()) {
-                                        element.DetailedPageIndex += increment;
-                                    }
-                                }
-                                PlayerAbilitySectionDetailedBegin += increment;
-                                PlayerAbilitySectionEnd += increment;
-                            }
-                            if (index < PlayerAbilitySectionBegin) {
-                                PlayerAbilitySectionBegin += increment;
-                                PlayerAbilitySectionTitleIndex += increment;
-                            }
-                        }
-                    }
-                }
-            }
-            
-        }
+        /// <returns>Return the total page number.</returns> 
+        // public int GetTotalPageNumber() {
+        //     int totalPageNumber = PlayerBasicBeyonderInformation.Count +
+        //                           NoteBookMenu.Count +
+        //                           PlayerAbilityThumbNailSection.Count +
+        //                           PlayerAbilityDetailedPageSection.Count +
+        //                           PotionFormulaThumbNailSection.Count +
+        //                           PotionFormulaDetailedPageSection.Count +
+        //                           PlayerNoteSection.Count;
+        //     return totalPageNumber;
+        // }
 
+        private void AppendDetailedBeyonderAbilityPage(NoteBookBeyonderAbilityThumbNail AbilityTextPanel, string key) {
+
+            LordOfTheMysteriesModPlayer modPlayer = Main.player[Main.myPlayer].GetModPlayer<LordOfTheMysteriesModPlayer>();
+
+            UIText abilityName = new(Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Title"));
+            abilityName.Height.Set(10f, 0f);
+            abilityName.Width.Set(155f, 0f);
+            abilityName.Top.Set(90f, 0f);
+            abilityName.Left.Set(0f, 0.5f);
+            AbilityTextPanel.DetailedPage.Add(abilityName);
+
+            UIImage abilityImage = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/BeyonderAbilityImages/DefaultImage"));
+            abilityImage.Height.Set(220f, 0f);
+            abilityImage.Width.Set(135f, 0f);
+            abilityImage.Top.Set(90f, 0f);
+            abilityImage.Left.Set(60f, 0f);
+            AbilityTextPanel.DetailedPage.Add(abilityImage);
+
+            UITextPanel<string> abilityDescription = new(Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Description"), textScale: 0.8f);
+            abilityDescription.Height.Set(180f, 0f);
+            abilityDescription.Width.Set(175f, 0f);
+            abilityDescription.Top.Set(130f, 0f);
+            abilityDescription.Left.Set(-15f, 0.5f);
+            abilityDescription.TextHAlign = 0f;
+            abilityDescription.OverflowHidden = true;
+            AbilityTextPanel.DetailedPage.Add(abilityDescription);
+
+            UIPanel abilitySetting = new();
+            abilitySetting.Height.Set(170f, 0f);
+            abilitySetting.Width.Set(320f, 0f);
+            abilitySetting.Top.Set(320f, 0f);
+            abilitySetting.Left.Set(60f, 0f);
+            AbilityTextPanel.DetailedPage.Add(abilitySetting);
+
+            UIList abilitySettingList = new();
+            abilitySettingList.Height.Set(170f, 0f);
+            abilitySettingList.Width.Set(320f, 0f);
+            abilitySettingList.VAlign = 0.5f;
+            abilitySettingList.HAlign = 0.5f;
+            abilitySetting.Append(abilitySettingList);
+
+            // Create the scroll bar
+            UIScrollbar scrollbar = new();
+            scrollbar.Height.Set(120f, 0f);
+            scrollbar.HAlign = 1f;
+            scrollbar.VAlign = 0.5f;
+            scrollbar.SetView(120f, 1200f);
+            abilitySetting.Append(scrollbar);
+            abilitySettingList.SetScrollbar(scrollbar);
+
+            string[] abilitySettingIndex = Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Settings.Index").Split(' ');
+
+            if (abilitySettingIndex.Contains("Mode")) {
+
+                UIElement ModeSettingSection = new();
+                ModeSettingSection.Height.Set(32f, 0f);
+                ModeSettingSection.Width.Set(240f, 0f);
+                ModeSettingSection.Top.Set(20f, 0f);
+                ModeSettingSection.HAlign = 0.5f;
+                abilitySettingList.Add(ModeSettingSection);
+                
+                UIImageButton autoModeButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/ButtonChoice"));
+                autoModeButton.Height.Set(32f, 0f);
+                autoModeButton.Width.Set(96f, 0f);
+                autoModeButton.Top.Set(0f, 0f);
+                autoModeButton.Left.Set(-96f, 0.5f);
+                ModeSettingSection.Append(autoModeButton);
+
+                UIText autoModeButtonText = new("Auto mode", textScale: 0.8f)
+                {
+                    VAlign = 0.5f,
+                    HAlign = 0.5f
+                };
+                autoModeButton.Append(autoModeButtonText);
+
+                UIImageButton manualModeButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/ButtonChoice"));
+                manualModeButton.Height.Set(32f, 0f);
+                manualModeButton.Width.Set(96f, 0f);
+                manualModeButton.Top.Set(0f, 0f);
+                manualModeButton.Left.Set(0f, 0.5f);
+                ModeSettingSection.Append(manualModeButton);
+
+                UIText manualModeButtonText = new("Manual mode", textScale: 0.8f)
+                {
+                    VAlign = 0.5f,
+                    HAlign = 0.5f
+                };
+                manualModeButton.Append(manualModeButtonText);
+
+                UITextPanel<string> ModeDescription = new(Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Settings.Mode.Manual"), textScale: 0.8f);
+                ModeDescription.Height.Set(100f, 0f);
+                ModeDescription.Width.Set(220f, 0f);
+                ModeDescription.Top.Set(52f, 0f);
+                ModeDescription.HAlign = 0.5f;
+                ModeDescription.TextHAlign = 0.5f;
+                ModeDescription.OverflowHidden = true;
+                abilitySettingList.Add(ModeDescription);
+
+                manualModeButton.SetVisibility(1.0f, 1.0f);
+
+                autoModeButton.OnClick += (evt, element) => {
+                    manualModeButton.SetVisibility(1.0f, 0.4f);
+                    autoModeButton.SetVisibility(1.0f, 1.0f);
+                    modPlayer.AbilityModeSettings[key] = true;
+                    ModeDescription.SetText(Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Settings.Mode.Auto"));
+                };
+
+                manualModeButton.OnClick += (evt, element) => {
+                    manualModeButton.SetVisibility(1.0f, 1.0f);
+                    autoModeButton.SetVisibility(1.0f, 0.4f);
+                    modPlayer.AbilityModeSettings[key] = false;
+                    ModeDescription.SetText(Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Settings.Mode.Manual"));
+                };
+            }
+        }
     }
 }

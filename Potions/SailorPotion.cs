@@ -16,7 +16,7 @@ namespace LordOfTheMysteriesMod.Potions
 		public int Sequence = 9;
 		public string SequenceName = "Sailor";
 		public string Pathway = "Sailor";
-		public string[] Abilities = {"EnhancedBreathing", "FastSwimming", "NightVision"};
+		public string[] Abilities = {"Swimmer", "NightVision"};
 
 		public override void SetStaticDefaults()
 		{

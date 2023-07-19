@@ -11,7 +11,7 @@ namespace LordOfTheMysteriesMod.Buffs
 {
     public class SeafarerBuff : ModBuff
     {
-        readonly BeyonderAbilities Abilities = new();
+        // readonly BeyonderAbilities Abilities = new();
         string texturePath = "LordOfTheMysteriesMod/Buffs/SeafarerBuff";
 
         public override void SetStaticDefaults()
@@ -41,7 +41,7 @@ namespace LordOfTheMysteriesMod.Buffs
             
 
             //Use Beyonder Abilities.
-            Abilities.UpdateBeyonderAbilities(player);
+            BeyonderAbilities.UpdateBeyonderAbilities(player);
 
             //Make sure that this buff will never be removed...at least for now.
             player.buffTime[buffIndex] = 1;

@@ -13,7 +13,7 @@ namespace LordOfTheMysteriesMod.Potions
 		public int Sequence = 8;
 		public string SequenceName = "Folk of Rage";
 		public string Pathway = "Sailor";
-		public string[] Abilities = {"EnhancedBreathing", "FastSwimming", "NightVision", "RagingBlow"};
+		public string[] Abilities = {"Swimmer", "NightVision", "RagingBlow"};
 
 		public override void SetStaticDefaults()
 		{
