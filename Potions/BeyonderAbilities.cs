@@ -234,30 +234,14 @@ namespace LordOfTheMysteriesMod.Buffs
         /// </summary>
         /// <param name="player"></param>
         public void Bioluminescence(Player player) {
-            if (player.wet) {
-                Lighting.AddLight(player.position.ToTileCoordinates().X, player.position.ToTileCoordinates().Y, 1f, 1f, 1f);
-            }
-        }
 
-        /// <summary>
-        /// Search for the nearest enemy within a certain distance.
-        /// </summary>
-        /// <param name="player"></param>
-        /// <param name="maxNPCDistance"> The upperbound of the distance between the player and a potential enemy target </param>
-        /// <returns> The nearest enemy NPC within the range maxNPCDistance </returns>
-        public static NPC SearchEnemy(Player player, float maxNPCDistance) {
-            float minNPCDistance = maxNPCDistance;
-            NPC nearestNPC = null;
-            foreach (var npc in Main.npc) {
-                if (npc.active && !npc.friendly && npc.type != 488) {
-                    Vector2 currVector = npc.Center - player.Center;
-                    if (currVector.Length() < minNPCDistance) {
-                        minNPCDistance = currVector.Length();
-                        nearestNPC = npc;
-                    }
+            LordOfTheMysteriesModPlayer modPlayer = player.GetModPlayer<LordOfTheMysteriesModPlayer>();
+
+            if (player.wet) {
+                if ((!modPlayer.AbilityModeSettings["Bioluminescence"] && Main.keyState.IsKeyDown(Keys.C)) || modPlayer.AbilityModeSettings["Bioluminescence"]) {
+                    Lighting.AddLight(player.position.ToTileCoordinates().X, player.position.ToTileCoordinates().Y, 1f, 1f, 1f);
                 }
             }
-            return nearestNPC;
         }
     }
 }

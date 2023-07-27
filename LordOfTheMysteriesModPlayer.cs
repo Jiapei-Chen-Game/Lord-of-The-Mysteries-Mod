@@ -3,11 +3,12 @@ using System.Collections.Generic;
 
 using Terraria;
 using Terraria.ModLoader;
-using Terraria.DataStructures;
 using Terraria.ModLoader.IO;
+using Terraria.DataStructures;
 
 using LordOfTheMysteriesMod.Buffs;
 using LordOfTheMysteriesMod.UI;
+using Terraria.GameInput;
 
 namespace LordOfTheMysteriesMod
 {
@@ -41,7 +42,12 @@ namespace LordOfTheMysteriesMod
         /// <para>The keys of the dictionary are strings whose correponding values are beyonder ability functions whose name equals to the value of their keys.</para>
         /// </summary>
         public Dictionary<string, Action<Player>> AbilityList = new();
+
+        bool BeyonderAbilityMode;
+
         public Dictionary<string, bool> AbilityModeSettings = new();
+        public Dictionary<string, bool> AbilityActiveSettings = new();
+        public Dictionary<string, int> AbilityTargetSettings = new();
 
         public int RagingBlowTimer;
         public int RagingBlowCDTimer;
@@ -52,8 +58,9 @@ namespace LordOfTheMysteriesMod
         public int WaterBallTimer;
         public List<bool> WaterBallPositions;
 
-        public override void Initialize()
-        {
+        public override void Initialize() {
+            BeyonderAbilityMode = false;
+
             RagingBlowTimer = 600;
             RagingBlowCDTimer = 3600;
             RagingBlowHit = false;
@@ -64,6 +71,9 @@ namespace LordOfTheMysteriesMod
             WaterBallTimer = 120;
             WaterBallPositions = new();
             AbilityModeSettings.Add("WaterBall", false);
+            AbilityTargetSettings.Add("WaterBall", 0);
+
+            AbilityModeSettings.Add("Bioluminescence", false);
         }
 
         public override void SaveData(TagCompound tag) {
@@ -86,6 +96,15 @@ namespace LordOfTheMysteriesMod
             }
             tag.Add("ModeSettingArrayKey", ModeSettingArrayKey);
             tag.Add("ModeSettingArrayValue", ModeSettingArrayValue);
+
+            List<string> TargetSettingArrayKey = new();
+            List<int> TargetSettingArrayValue = new();
+            foreach (KeyValuePair<string, int> element in AbilityTargetSettings) {
+                TargetSettingArrayKey.Add(element.Key);
+                TargetSettingArrayValue.Add(element.Value);
+            }
+            tag.Add("TargetSettingArrayKey", TargetSettingArrayKey);
+            tag.Add("TargetSettingArrayValue", TargetSettingArrayValue);
 		}
 
         public override void LoadData(TagCompound tag) {
@@ -109,14 +128,45 @@ namespace LordOfTheMysteriesMod
                 } else {
                     AbilityModeSettings[ModeSettingArrayKey[i]] = ModeSettingArrayValue[i];
                 }
-            } 
+            }
+
+            List<string> TargetSettingArrayKey = new(tag.GetList<string>("TargetSettingArrayKey"));
+            List<int> TargetSettingArrayValue = new(tag.GetList<int>("TargetSettingArrayValue"));
+            for (int i = 0; i < TargetSettingArrayKey.Count; i++) {
+                if (!AbilityTargetSettings.ContainsKey(TargetSettingArrayKey[i])) {
+                    AbilityTargetSettings.Add(TargetSettingArrayKey[i], TargetSettingArrayValue[i]);
+                } else {
+                    AbilityTargetSettings[TargetSettingArrayKey[i]] = TargetSettingArrayValue[i];
+                }
+            }
 		}
+
+        public override void ProcessTriggers(TriggersSet triggersSet)
+        {
+            if (LordOfTheMysteriesMod.BeyonderAbilityScrollLeft.JustPressed) {
+                if (BeyonderAbilityMode) {
+                    BeyonderAbilityMode = false;
+                    Main.NewText("BeyonderAbilityMode: " + BeyonderAbilityMode);
+                } else {
+                    BeyonderAbilityMode = true;
+                    Main.NewText("BeyonderAbilityMode: " + BeyonderAbilityMode);
+                }
+            }
+        }
 
         public override void Kill (double damage, int hitDirection, bool pvp, PlayerDeathReason damageSource) {
             Pathway = "";
             SequenceName = "";
             Sequence = 10;
             BeyonderBuff = 0;
+
+            AbilityList.Clear();
+
+            AbilityModeSettings["RagingBlow"] = false;
+            AbilityModeSettings["WaterBall"] = false;
+            AbilityModeSettings["Bioluminescence"] = false;
+
+            AbilityTargetSettings["WaterBall"] = 0;
         }
 
         public override void OnHitNPC(Item item, NPC target, int damage, float knockback, bool crit)
@@ -129,6 +179,7 @@ namespace LordOfTheMysteriesMod
         public override void OnEnterWorld(Player player)
         {
             NoteBookUI.Visible = false;
+            BeyonderAbilitiesPanelUI.Visible = true;
             base.OnEnterWorld(player);
         }
     }

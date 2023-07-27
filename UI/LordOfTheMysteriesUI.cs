@@ -1,7 +1,5 @@
 using System;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
@@ -12,14 +10,30 @@ using Terraria.UI;
 using Terraria.ModLoader;
 using Terraria.GameContent.UI.Elements;
 
-using Hjson;
 using Terraria.Localization;
 
 namespace LordOfTheMysteriesMod.UI
 {
+    public class NotebookCover : UIElement
+    {
+        readonly string texturePath = "LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/NotebookCover";
+        public NotebookCover()
+        {
+            Width.Set(900f, 0f);
+            Height.Set(600f, 0f);
+            Left.Set(-450f, 0.5f);
+            Top.Set(-300f, 0.5f);
+        }
+
+        protected override void DrawSelf(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(ModContent.Request<Texture2D>(texturePath).Value, GetDimensions().Position(), Color.White);
+        }
+    }
+
     public class NotebookLeftPage : UIElement
     {
-        readonly string texturePath = "LordOfTheMysteriesMod/UI/UIImages/NotebookLeftPage";
+        readonly string texturePath = "LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/NotebookLeftPage";
         public NotebookLeftPage()
         {
             Width.Set(440f, 0f);
@@ -36,7 +50,7 @@ namespace LordOfTheMysteriesMod.UI
 
     public class NotebookRightPage : UIElement
     {
-        readonly string texturePath = "LordOfTheMysteriesMod/UI/UIImages/NotebookRightPage";
+        readonly string texturePath = "LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/NotebookRightPage";
         public NotebookRightPage()
         {
             Width.Set(440f, 0f);
@@ -51,33 +65,12 @@ namespace LordOfTheMysteriesMod.UI
         }
     }
 
-    public class NoteBookButton : UIState
-    {
-        public override void OnInitialize()
-        {
-            UIImageButton noteBookButton = new UIImageButton(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/ButtonPlay"));
-
-            noteBookButton.SetVisibility(1f, 0.8f);
-            noteBookButton.Width.Set(96f, 0f);
-            noteBookButton.Height.Set(96f, 0f);
-            noteBookButton.Left.Set(-200f, 0.5f);
-            noteBookButton.Top.Set(30f, 0f);
-
-            noteBookButton.OnClick += (evt, element) => {
-                NoteBookUI.currentPageNumber = 0;
-                NoteBookUI.Visible = true;
-            };
-
-            Append(noteBookButton);
-        }
-    }
-
-    public class NoteBookBeyonderAbilityThumbNail : UIPanel
+    public class NoteBookBeyonderAbilityThumbNail : UIImageButton
     {
         public string imagePath;
         public string text;
         public List<UIElement> DetailedPage;
-        public NoteBookBeyonderAbilityThumbNail(string text, List<UIElement> DetailedPage, string imagePath = "LordOfTheMysteriesMod/UI/UIImages/TestImage")
+        public NoteBookBeyonderAbilityThumbNail(ReLogic.Content.Asset<Texture2D> texture, string text, List<UIElement> DetailedPage, string imagePath = "LordOfTheMysteriesMod/UI/UIImages/TestImage") : base(texture)
         {
             this.imagePath = imagePath;
             this.text = text;
@@ -86,6 +79,73 @@ namespace LordOfTheMysteriesMod.UI
 
         public string GetText() {
             return text;
+        }
+    }
+
+    public class NoteBookScrollbar : UIScrollbar
+    {
+        readonly string texturePath;
+        UIImage scrollbarSlider;
+        UIList uIList;
+
+        float uIListTotalHeight;
+        public NoteBookScrollbar(string texturePath, UIList uIList)
+        {
+            this.texturePath = texturePath;
+            this.uIList = uIList;
+
+            scrollbarSlider = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/NotebookScrollBarSlider"));
+            scrollbarSlider.Height.Set(384f, 0f);
+            scrollbarSlider.Width.Set(9f, 0f);
+            scrollbarSlider.Left.Set(3f, 0f);
+            scrollbarSlider.Top.Set(3f, 0f);
+            scrollbarSlider.ScaleToFit = true;
+            Append(scrollbarSlider);
+
+            uIListTotalHeight = uIList.GetTotalHeight();
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            if (uIListTotalHeight != uIList.GetTotalHeight()) {
+                if (uIList.GetTotalHeight() > uIList.Height.Pixels) {
+                    scrollbarSlider.Height.Set(uIList.Height.Pixels * 384f / uIList.GetTotalHeight(), 0f);
+                    scrollbarSlider.Top.Set(uIList.ViewPosition * (384 - scrollbarSlider.Height.Pixels) / (uIList.GetTotalHeight() - uIList.Height.Pixels) + 3f, 0f);
+                } else {
+                    scrollbarSlider.Height.Set(384f, 0f);
+                    scrollbarSlider.Top.Set(3f, 0f);
+                }
+                scrollbarSlider.Recalculate();
+            }
+            base.Update(gameTime);
+        }
+
+        protected override void DrawSelf(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(ModContent.Request<Texture2D>(texturePath).Value, GetDimensions().Position(), Color.White);
+        }
+    }
+
+    public class NoteBookButton : UIState
+    {
+        public override void OnInitialize()
+        {
+            UIImageButton noteBookButton = new UIImageButton(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/ButtonPlay"));
+
+            noteBookButton.SetVisibility(1f, 0.8f);
+            noteBookButton.Width.Set(96f, 0f);
+            noteBookButton.Height.Set(64f, 0f);
+            noteBookButton.Top.Set(-120f, 1f);
+            noteBookButton.HAlign = 0.5f;
+
+            noteBookButton.OnClick += (evt, element) => {
+                NoteBookUI.PageVisible[NoteBookUI.currentPageNumber] = false;
+                NoteBookUI.currentPageNumber = 0;
+                NoteBookUI.PageVisible[NoteBookUI.currentPageNumber] = true;
+                NoteBookUI.Visible = true;
+            };
+
+            Append(noteBookButton);
         }
     }
 
@@ -106,8 +166,9 @@ namespace LordOfTheMysteriesMod.UI
         public static List<List<UIElement>> PotionFormulaDetailedPageSection = new();
         public static List<List<UIElement>> PlayerNoteSection = new();
 
-        UIImage Cover = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/NotebookCover"));
+        NoteBookScrollbar PlayerAbilityThumbNailScrollbar;
 
+        NotebookCover Cover = new();
         NotebookLeftPage LeftPage = new();
         NotebookRightPage RightPage = new();
         UIText LeftPageNumber = new("1");
@@ -118,14 +179,16 @@ namespace LordOfTheMysteriesMod.UI
         UIText Page1PlayerSequenceInformation = new("To Be Loaded");
         UIText Page1PlayerSequenceNameInformation = new("To Be Loaded");
 
-        UIText Page2MenuTitle = new("Menu", large: true);
+        UIText Page2MenuTitle = new("Menu", textScale: 1.5f);
         UIText Page2MenuPlayerBeyonderAbilities = new("1. My Beyonder Abilities");
         UIText Page2MenuPotionFormula = new("2. Potion Formulas");
         UIText Page2MenuPlayerNotes = new("3. My Notes");
 
-        UIImageButton closeButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/ButtonDelete"));
-        UIImageButton nextPageButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/ButtonNextPage"));
-        UIImageButton previousPageButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/ButtonPreviousPage"));
+        UIList BeyonderAbilityThumbNails = new();
+
+        UIImageButton closeButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/ButtonDelete"));
+        UIImageButton nextPageButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/ButtonNextPage"));
+        UIImageButton previousPageButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/ButtonPreviousPage"));
 
         public override void OnInitialize()
         {
@@ -133,12 +196,7 @@ namespace LordOfTheMysteriesMod.UI
 
             PageVisible[0] = true;
 
-            Cover.Width.Set(900f, 0f);
-            Cover.Height.Set(600f, 0f);
-            Cover.Left.Set(-450f, 0.5f);
-            Cover.Top.Set(-300f, 0.5f);
             Append(Cover);
-
             Cover.Append(LeftPage);
             Cover.Append(RightPage);
 
@@ -166,7 +224,7 @@ namespace LordOfTheMysteriesMod.UI
 
             NoteBookMenu[0].Add(Page2MenuTitle);
             Page2MenuTitle.Top.Set(80f, 0);
-            Page2MenuTitle.HAlign = 0.5f;
+            Page2MenuTitle.Left.Set(170f, 0);
 
             NoteBookMenu[0].Add(Page2MenuPlayerBeyonderAbilities);
             Page2MenuPlayerBeyonderAbilities.Top.Set(150f, 0);
@@ -210,7 +268,26 @@ namespace LordOfTheMysteriesMod.UI
             PlayerAbilitySectionTitleText.HAlign = 0.5f;
             PlayerAbilitySectionTitleText.VAlign = 0.5f;
 
+            UIText BeyonderAbilitiesPanelEditor = new("Edit Beyonder Abilities Panel");
+            PlayerAbilityThumbNailSection[0].Add(BeyonderAbilitiesPanelEditor);
+            BeyonderAbilitiesPanelEditor.Top.Set(30f, 0.5f);
+            BeyonderAbilitiesPanelEditor.HAlign = 0.5f;
+
             PlayerAbilityThumbNailSection.Add(new List<UIElement>());
+
+            PlayerAbilityThumbNailSection[1].Add(BeyonderAbilityThumbNails);
+            BeyonderAbilityThumbNails.Width.Set(320f, 0f);
+            BeyonderAbilityThumbNails.Height.Set(400f, 0f);
+            BeyonderAbilityThumbNails.Top.Set(90f, 0f);
+            BeyonderAbilityThumbNails.HAlign = 0.5f;
+
+            PlayerAbilityThumbNailScrollbar = new("LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/NotebookScrollBar", BeyonderAbilityThumbNails);
+            PlayerAbilityThumbNailScrollbar.Height.Set(400f, 0f);
+            PlayerAbilityThumbNailScrollbar.Width.Set(15f, 0f);
+            PlayerAbilityThumbNailScrollbar.Left.Set(-60f, 1f);
+            PlayerAbilityThumbNailScrollbar.VAlign = 0.5f;
+            PlayerAbilityThumbNailSection[1].Add(PlayerAbilityThumbNailScrollbar);
+            BeyonderAbilityThumbNails.SetScrollbar(PlayerAbilityThumbNailScrollbar);
 
             PotionFormulaThumbNailSection.Add(new List<UIElement>());
 
@@ -283,14 +360,8 @@ namespace LordOfTheMysteriesMod.UI
 
         public override void Update(GameTime gametime) {
 
-            /// <summary>
-            /// When there is a change on the page that is displayed, set this value to true. Otherwise false.
-            /// </summary>
             bool needsUpdate = false;
 
-            /// <summary>
-            /// The player who is using this UI system
-            /// </summary>
             LordOfTheMysteriesModPlayer player = Main.LocalPlayer.GetModPlayer<LordOfTheMysteriesModPlayer>();
 
             // If the player is viewing page 1 and page 2, then update the player's information based on
@@ -309,72 +380,45 @@ namespace LordOfTheMysteriesMod.UI
             // If the player is viewing beyonder abilities thumbnail/menu section, then update the corresponding
             // information based on player beyonder abilities accordingly
             if (CheckSectionPageVisibility(ToPageVisibilityIndex(0, PlayerAbilityThumbNailSection), 255)) {
+
+                UIList PlayerAbilityThumbNails = (UIList)PlayerAbilityThumbNailSection[1][0];
                 Dictionary<string, Action<Player>> playerAbilityDictionary = player.AbilityList;
-                int currentAbilitySectionIndex = 1;
+                // int currentAbilitySectionIndex = 1;
 
                 // Check every beyonder ability thumbnail. If there exists a thumbnail whose corresponding beyonder
                 // ability is not currently owned by the player, then remove the thumbnail from Pages.
-                for (int i = 1; i < PlayerAbilityThumbNailSection.Count; i++) {
-                    int removeNumber = PlayerAbilityThumbNailSection[i].RemoveAll(item =>
-                    {
-                        NoteBookBeyonderAbilityThumbNail textItem = (NoteBookBeyonderAbilityThumbNail)item;
-                        // When the thumbnail is removed from Pages, its corresponding detailed page should also
-                        // be removed.
-                        if (!playerAbilityDictionary.ContainsKey(textItem.GetText())) {
-                            PlayerAbilityDetailedPageSection.Remove(textItem.DetailedPage);
-                            return true;
-                        }
-                        return false;
-                    });
-                    // If there is any thumbnail removed, then we need an update
-                    if (removeNumber > 0) {
+                for (int i = 0; i < PlayerAbilityThumbNails.Count; i++) {
+                    NoteBookBeyonderAbilityThumbNail textItem = (NoteBookBeyonderAbilityThumbNail)PlayerAbilityThumbNails._items[i];
+                    if (!playerAbilityDictionary.ContainsKey(textItem.GetText())) {
+                        PlayerAbilityThumbNails.Remove(textItem);
+                        PlayerAbilityDetailedPageSection.Remove(textItem.DetailedPage);
                         needsUpdate = true;
-                        if (PlayerAbilityThumbNailSection[i].Count == 0 && i > 1) {
-                            PlayerAbilityThumbNailSection.RemoveAt(i);
-                        }
                     }
                 }
 
                 foreach (string key in playerAbilityDictionary.Keys) {
                     bool containsKey = false;
 
-                    for (int i = 1; i < PlayerAbilityThumbNailSection.Count; i++) {
-                        foreach (NoteBookBeyonderAbilityThumbNail element in PlayerAbilityThumbNailSection[i].Cast<NoteBookBeyonderAbilityThumbNail>()) {
-                            if (element is not null && element.GetText().Equals(key)) {
-                                containsKey = true;
-                                break;
-                            }
-                        }
-                        if (containsKey) {
+                    for (int i = 0; i < PlayerAbilityThumbNails.Count; i++) {
+                        NoteBookBeyonderAbilityThumbNail textItem = (NoteBookBeyonderAbilityThumbNail)PlayerAbilityThumbNails._items[i];
+                        if (textItem is not null && textItem.GetText().Equals(key)) {
+                            containsKey = true;
                             break;
                         }
                     }
 
                     if (!containsKey) {
 
-                        //Add a beyonder ability thumbnail to the notebook
-                        if (PlayerAbilityThumbNailSection[currentAbilitySectionIndex].Count == 4) {
-                            int previousAbilitySectionIndex = currentAbilitySectionIndex;
-                            for (int i = currentAbilitySectionIndex; i < PlayerAbilityThumbNailSection.Count; i++) {
-                                if (PlayerAbilityThumbNailSection[i].Count < 4) {
-                                    currentAbilitySectionIndex = i;
-                                    break;
-                                }
-                            }
-                            if (currentAbilitySectionIndex == previousAbilitySectionIndex) {
-                                PlayerAbilityThumbNailSection.Add(new List<UIElement>());
-                                currentAbilitySectionIndex = PlayerAbilityThumbNailSection.Count - 1;
-                            }
-                        }
-
                         List<UIElement> newPlayerAbilityDetailedPage = new();
-                        NoteBookBeyonderAbilityThumbNail AbilityTextPanel = new(key, newPlayerAbilityDetailedPage);
+                        NoteBookBeyonderAbilityThumbNail AbilityTextPanel = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/BeyonderAbilityThumbnail"), key, newPlayerAbilityDetailedPage);
+                        PlayerAbilityThumbNails.Add(AbilityTextPanel);
 
                         PlayerAbilityDetailedPageSection.Add(AbilityTextPanel.DetailedPage);
 
                         AbilityTextPanel.Width.Set(320f, 0f);
                         AbilityTextPanel.Height.Set(100f, 0f);
-                        AbilityTextPanel.MarginLeft = 60f;
+                        AbilityTextPanel.SetVisibility(1f, 0.8f);
+                        AbilityTextPanel.HAlign = 0.5f;
 
                         AbilityTextPanel.OnClick += (evt, element) => {
                             PageVisible[currentPageNumber] = false;
@@ -387,19 +431,15 @@ namespace LordOfTheMysteriesMod.UI
                         image.Height.Set(64f, 0f);
                         image.Width.Set(64f, 0f);
                         image.ScaleToFit = true;
-                        image.Left.Set(10f, 0f);
+                        image.Left.Set(26f, 0f);
                         image.VAlign = 0.5f;
 
-                        UIText title = new(AbilityTextPanel.text);
+                        UIText title = new(Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{AbilityTextPanel.text}.Title"));
                         AbilityTextPanel.Append(title);
-                        title.Left.Set(100f, 0f);
+                        title.Left.Set(150f, 0f);
                         title.VAlign = 0.5f;
 
-                        AbilityTextPanel.Top.Set(100f * PlayerAbilityThumbNailSection[currentAbilitySectionIndex].Count + 90f, 0);
-                        PlayerAbilityThumbNailSection[currentAbilitySectionIndex].Add(AbilityTextPanel);
-
                         // Add the detailed page to the notebook
-
                         AppendDetailedBeyonderAbilityPage(AbilityTextPanel, key);
 
                         needsUpdate = true;
@@ -432,6 +472,8 @@ namespace LordOfTheMysteriesMod.UI
 
                 PageNumber = currentPageNumber;
             }
+
+            PlayerAbilityThumbNailScrollbar.Update(Main._drawInterfaceGameTime);
         }
 
         /// <summary>
@@ -570,7 +612,7 @@ namespace LordOfTheMysteriesMod.UI
             }
 
             index += PlayerAbilityThumbNailSection.Count;
-            
+
             if (ReferenceEquals(UIElementList, PlayerAbilityDetailedPageSection)) {
                 return index / 2;
             }
@@ -619,23 +661,8 @@ namespace LordOfTheMysteriesMod.UI
                 if (string.IsNullOrEmpty(words[i])) continue;
                 words[i] = char.ToUpper(words[i][0]) + words[i].Substring(1);
             }
-           return string.Join("", words);
+            return string.Join("", words);
         }
-
-        /// <summary>
-        /// Return the total page number.
-        /// </summary>
-        /// <returns>Return the total page number.</returns> 
-        // public int GetTotalPageNumber() {
-        //     int totalPageNumber = PlayerBasicBeyonderInformation.Count +
-        //                           NoteBookMenu.Count +
-        //                           PlayerAbilityThumbNailSection.Count +
-        //                           PlayerAbilityDetailedPageSection.Count +
-        //                           PotionFormulaThumbNailSection.Count +
-        //                           PotionFormulaDetailedPageSection.Count +
-        //                           PlayerNoteSection.Count;
-        //     return totalPageNumber;
-        // }
 
         private void AppendDetailedBeyonderAbilityPage(NoteBookBeyonderAbilityThumbNail AbilityTextPanel, string key) {
 
@@ -655,39 +682,43 @@ namespace LordOfTheMysteriesMod.UI
             abilityImage.Left.Set(60f, 0f);
             AbilityTextPanel.DetailedPage.Add(abilityImage);
 
-            UITextPanel<string> abilityDescription = new(Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Description"), textScale: 0.8f);
-            abilityDescription.Height.Set(180f, 0f);
-            abilityDescription.Width.Set(175f, 0f);
-            abilityDescription.Top.Set(130f, 0f);
-            abilityDescription.Left.Set(-15f, 0.5f);
-            abilityDescription.TextHAlign = 0f;
-            abilityDescription.OverflowHidden = true;
-            AbilityTextPanel.DetailedPage.Add(abilityDescription);
+            UIImage abilityDescriptionBackground = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/BeyonderAbilityDescriptionBackground"));
+            abilityDescriptionBackground.Height.Set(180f, 0f);
+            abilityDescriptionBackground.Width.Set(175f, 0f);
+            abilityDescriptionBackground.Top.Set(130f, 0f);
+            abilityDescriptionBackground.Left.Set(-15f, 0.5f);
+            AbilityTextPanel.DetailedPage.Add(abilityDescriptionBackground);
 
-            UIPanel abilitySetting = new();
-            abilitySetting.Height.Set(170f, 0f);
-            abilitySetting.Width.Set(320f, 0f);
-            abilitySetting.Top.Set(320f, 0f);
-            abilitySetting.Left.Set(60f, 0f);
-            AbilityTextPanel.DetailedPage.Add(abilitySetting);
+            UIText abilityDescription = new(Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Description"), textScale: 0.8f);
+            abilityDescription.Height.Set(160f, 0f);
+            abilityDescription.Width.Set(155f, 0f);
+            abilityDescription.Top.Set(15f, 0f);
+            abilityDescription.HAlign = 0.5f;
+            abilityDescriptionBackground.Append(abilityDescription);
+
+            UIImage abilitySettingBackground = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/BeyonderAbilitySettingBackground"));
+            abilitySettingBackground.Height.Set(170f, 0f);
+            abilitySettingBackground.Width.Set(320f, 0f);
+            abilitySettingBackground.Top.Set(320f, 0f);
+            abilitySettingBackground.Left.Set(60f, 0f);
+            AbilityTextPanel.DetailedPage.Add(abilitySettingBackground);
 
             UIList abilitySettingList = new();
-            abilitySettingList.Height.Set(170f, 0f);
-            abilitySettingList.Width.Set(320f, 0f);
+            abilitySettingList.Height.Set(150f, 0f);
+            abilitySettingList.Width.Set(300f, 0f);
             abilitySettingList.VAlign = 0.5f;
             abilitySettingList.HAlign = 0.5f;
-            abilitySetting.Append(abilitySettingList);
+            abilitySettingBackground.Append(abilitySettingList);
 
             // Create the scroll bar
             UIScrollbar scrollbar = new();
             scrollbar.Height.Set(120f, 0f);
-            scrollbar.HAlign = 1f;
+            scrollbar.Left.Set(-30f, 1f);
             scrollbar.VAlign = 0.5f;
-            scrollbar.SetView(120f, 1200f);
-            abilitySetting.Append(scrollbar);
+            abilitySettingBackground.Append(scrollbar);
             abilitySettingList.SetScrollbar(scrollbar);
 
-            string[] abilitySettingIndex = Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Settings.Index").Split(' ');
+            string[] abilitySettingIndex = Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Settings.Index").Split(", ");
 
             if (abilitySettingIndex.Contains("Mode")) {
 
@@ -697,8 +728,8 @@ namespace LordOfTheMysteriesMod.UI
                 ModeSettingSection.Top.Set(20f, 0f);
                 ModeSettingSection.HAlign = 0.5f;
                 abilitySettingList.Add(ModeSettingSection);
-                
-                UIImageButton autoModeButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/ButtonChoice"));
+
+                UIImageButton autoModeButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/ButtonChoice"));
                 autoModeButton.Height.Set(32f, 0f);
                 autoModeButton.Width.Set(96f, 0f);
                 autoModeButton.Top.Set(0f, 0f);
@@ -712,7 +743,7 @@ namespace LordOfTheMysteriesMod.UI
                 };
                 autoModeButton.Append(autoModeButtonText);
 
-                UIImageButton manualModeButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/ButtonChoice"));
+                UIImageButton manualModeButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/ButtonChoice"));
                 manualModeButton.Height.Set(32f, 0f);
                 manualModeButton.Width.Set(96f, 0f);
                 manualModeButton.Top.Set(0f, 0f);
@@ -728,7 +759,7 @@ namespace LordOfTheMysteriesMod.UI
 
                 UITextPanel<string> ModeDescription = new(Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Settings.Mode.Manual"), textScale: 0.8f);
                 ModeDescription.Height.Set(100f, 0f);
-                ModeDescription.Width.Set(220f, 0f);
+                ModeDescription.Width.Set(200f, 0f);
                 ModeDescription.Top.Set(52f, 0f);
                 ModeDescription.HAlign = 0.5f;
                 ModeDescription.TextHAlign = 0.5f;
@@ -751,6 +782,122 @@ namespace LordOfTheMysteriesMod.UI
                     ModeDescription.SetText(Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Settings.Mode.Manual"));
                 };
             }
+
+            if (abilitySettingIndex.Contains("Target")) {
+
+                string[] TargetSettingIndex = Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Settings.Target.Index").Split(", ");
+
+                UIElement TargetSettingSection = new();
+                TargetSettingSection.Height.Set(37f, 0f);
+                TargetSettingSection.Width.Set(260f, 0f);
+                TargetSettingSection.Top.Set(20f, 0f);
+                TargetSettingSection.HAlign = 0.5f;
+                abilitySettingList.Add(TargetSettingSection);
+
+                UIText TargetSettingTitle = new("Target: ", textScale: 0.8f);
+                TargetSettingTitle.Height.Set(32f, 0f);
+                TargetSettingTitle.Width.Set(32f, 0f);
+                TargetSettingTitle.Top.Set(5f, 0f);
+                TargetSettingTitle.HAlign = 0f;
+                TargetSettingSection.Append(TargetSettingTitle);
+
+                UIImageButton previousTargetButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/ButtonPreviousChoice"));
+                previousTargetButton.Height.Set(20f, 0f);
+                previousTargetButton.Width.Set(11f, 0f);
+                previousTargetButton.Top.Set(0f, 0f);
+                previousTargetButton.Left.Set(-77f, 0.5f);
+                TargetSettingSection.Append(previousTargetButton);
+
+                UIText currentTargetChoice = new(TargetSettingIndex[0], textScale: 0.8f);
+                currentTargetChoice.Height.Set(32f, 0f);
+                currentTargetChoice.Width.Set(144f, 0f);
+                currentTargetChoice.Top.Set(5f, 0f);
+                currentTargetChoice.Left.Set(-56f, 0.5f);
+                currentTargetChoice.IsWrapped = true;
+                TargetSettingSection.Append(currentTargetChoice);
+
+                UIImageButton nextTargetButton = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/NotebookUIImages/ButtonNextChoice"));
+                nextTargetButton.Height.Set(20f, 0f);
+                nextTargetButton.Width.Set(11f, 0f);
+                nextTargetButton.Top.Set(0f, 0f);
+                nextTargetButton.Left.Set(98f, 0.5f);
+                TargetSettingSection.Append(nextTargetButton);
+
+                UITextPanel<string> TargetDescription = new(Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Settings.Target.NearestEnemy.Title"), textScale: 0.8f);
+                TargetDescription.Height.Set(100f, 0f);
+                TargetDescription.Width.Set(200f, 0f);
+                TargetDescription.Top.Set(0f, 0f);
+                TargetDescription.MarginTop = 5f;
+                TargetDescription.HAlign = 0.5f;
+                TargetDescription.TextHAlign = 0.5f;
+                TargetDescription.OverflowHidden = true;
+                abilitySettingList.Add(TargetDescription);
+
+                previousTargetButton.OnClick += (evt, element) => {
+                    if (modPlayer.AbilityTargetSettings[key] == 0) {
+                        modPlayer.AbilityTargetSettings[key] = TargetSettingIndex.Length - 1;
+                    } else {
+                        modPlayer.AbilityTargetSettings[key]--;
+                    }
+                    currentTargetChoice.SetText(Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Settings.Target.{TargetSettingIndex[modPlayer.AbilityTargetSettings[key]]}.Title"));
+                    TargetDescription.SetText(Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Settings.Target.{TargetSettingIndex[modPlayer.AbilityTargetSettings[key]]}.Description"));
+                };
+
+                nextTargetButton.OnClick += (evt, element) => {
+                    if (modPlayer.AbilityTargetSettings[key] == TargetSettingIndex.Length - 1) {
+                        modPlayer.AbilityTargetSettings[key] = 0;
+                    } else {
+                        modPlayer.AbilityTargetSettings[key]++;
+                    }
+                    currentTargetChoice.SetText(Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Settings.Target.{TargetSettingIndex[modPlayer.AbilityTargetSettings[key]]}.Title"));
+                    TargetDescription.SetText(Language.GetTextValue($"Mods.LordOfTheMysteriesMod.BeyonderAbilities.{key}.Settings.Target.{TargetSettingIndex[modPlayer.AbilityTargetSettings[key]]}.Description"));
+                };
+            }
+        }
+    }
+
+    public class BeyonderAbilitiesPanelUI : UIState
+    {
+        public static bool Visible = true;
+
+        UIImage BeyonderAbilitiesPanel = new(ModContent.Request<Texture2D>("LordOfTheMysteriesMod/UI/UIImages/BeyonderAbilitiesPanelUIImages/BeyonderAbilitiesPanel"));
+        UIElement[] BeyonderAbilitiesList = new UIElement[20];
+        public override void OnInitialize()
+        {
+            BeyonderAbilitiesPanel.Width.Set(700f, 0f);
+            BeyonderAbilitiesPanel.Height.Set(150f, 0f);
+            BeyonderAbilitiesPanel.Top.Set(-150f, 1f);
+            BeyonderAbilitiesPanel.HAlign = 0.5f;
+            Append(BeyonderAbilitiesPanel);
+        }
+
+        /// <summary>
+        /// Adds a beyonder ability to the beyonder abilities list.
+        /// </summary>
+        /// <param name="BeyonderAbilityName"> The name of a beyonder ability </param>
+        /// <returns> If the beyonder ability is successfully added to the list, return true. Else, return false.</returns> 
+        public bool AddBeyonderAbility(string BeyonderAbilityName) {
+            //TODO
+            return true;
+        }
+
+        /// <summary>
+        /// Removes a beyonder ability to the beyonder abilities list.
+        /// </summary>
+        /// <param name="BeyonderAbilityName"> The name of a beyonder ability </param>
+        /// <returns> If the beyonder ability is successfully removed from the list, return true. Else, return false.</returns> 
+        public bool RemoveBeyonderAbility(string BeyonderAbilityName) {
+            //TODO
+            return true;
+        }
+
+        /// <summary>
+        /// Removes all beyonder abilities in the beyonder abilities List.
+        /// </summary>
+        /// <returns>If the beyonder abilities are successfully cleared, return true. Else, return false.</returns>
+        public bool ClearBeyonderAbilities() {
+            //TODO
+            return true;
         }
     }
 }

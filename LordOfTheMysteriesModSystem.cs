@@ -17,12 +17,18 @@ namespace LordOfTheMysteriesMod
 		NoteBookButton NoteBookButton = new();
 		UserInterface NoteBookButtonInterface = new();
 
+		BeyonderAbilitiesPanelUI AbilitiesPanel = new();
+		UserInterface AbilitiesPanelInterface = new();
+
         public override void Load()
         {
 			NoteBook.Activate();
 			NoteBookInterface.SetState(NoteBook);
 			NoteBookButton.Activate();
 			NoteBookButtonInterface.SetState(NoteBookButton);
+
+			AbilitiesPanel.Activate();
+			AbilitiesPanelInterface.SetState(AbilitiesPanel);
         }
 
         public override void UpdateUI(GameTime gameTime)
@@ -31,6 +37,11 @@ namespace LordOfTheMysteriesMod
 				NoteBookInterface?.Update(gameTime);
 			}
 			NoteBookButtonInterface?.Update(gameTime);
+
+			if (BeyonderAbilitiesPanelUI.Visible) {
+				AbilitiesPanelInterface?.Update(gameTime);
+			}
+
 			base.UpdateUI(gameTime);
 		}
 
@@ -55,6 +66,17 @@ namespace LordOfTheMysteriesMod
 				delegate
 				{
 					NoteBookButton.Draw(Main.spriteBatch);
+					return true;
+				},
+				InterfaceScaleType.UI)
+				);
+
+				layers.Insert(MouseTextIndex, new LegacyGameInterfaceLayer(
+				"LordOfTheMysteriesMod : BeyonderAbilitiesPanelUI",
+				delegate
+				{
+					if (BeyonderAbilitiesPanelUI.Visible)
+						AbilitiesPanel.Draw(Main.spriteBatch);
 					return true;
 				},
 				InterfaceScaleType.UI)

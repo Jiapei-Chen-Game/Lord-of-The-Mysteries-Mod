@@ -95,7 +95,7 @@ Mods: {
                 enemies.
                 '''
                 Settings: {
-                    Index: Mode
+                    Index: Mode, Target
                     Mode: {
                         Auto:
                         ''' 
@@ -111,6 +111,55 @@ Mods: {
                         clicker.
                         '''
                     }
+                    Target: {
+                        Index: NearestEnemy, EnemyWithLeastHealth, EnemyWithLowestHealthPercentage, EnemyWithHighestAttack
+                        NearestEnemy: {
+                            Title:
+                            '''
+                            Nearest Enemy
+                            '''
+                            Description:
+                            '''
+                            Water ball will attack the nearest enemy.
+                            '''
+                        }
+                        EnemyWithLeastHealth: {
+                            Title:
+                            '''
+                            Enemy With Least 
+                            Health
+                            '''
+                            Description:
+                            '''
+                            Water ball will attack the enemy with 
+                            least health.
+                            '''
+                        }   
+                        EnemyWithLowestHealthPercentage: {
+                            Title:
+                            '''
+                            Enemy With Lowest 
+                            Health Percentage
+                            '''
+                            Description:
+                            '''
+                            Water ball will attack the enemy with the 
+                            lowest health percentage.
+                            '''
+                        }    
+                        EnemyWithHighestAttack: {
+                            Title:
+                            '''
+                            Enemy With Highest
+                            Attack
+                            '''
+                            Description:
+                            '''
+                            Water ball will attack the enemy who can 
+                            deal the most damage.
+                            '''   
+                        }                 
+                    }
                 }
             }
 
@@ -124,7 +173,20 @@ Mods: {
                 under water.
                 '''
                 Settings: {
-                    Index: null
+                    Index: Mode
+                    Mode: {
+                        Auto:
+                        ''' 
+                        You will automatically emit light when
+                        you are in water.
+                        '''
+                        Manual:
+                        '''
+                        You can emit light in water when you press
+                        the beyonder ability button, and stop
+                        emitting light by pressing the same button.
+                        '''
+                    }
                 }
             }
         }
